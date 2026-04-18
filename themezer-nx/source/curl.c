@@ -46,15 +46,15 @@ char *GenLink(RequestInfo_t *rI){
     char *query;
     if (rI->target <= 7)
     {
-        // query($target:Target,$page:PositiveInt,$limit:PositiveInt,$sort:ItemSort,$order:SortOrder,$query:String){switchThemes(target:$target,page:$page,limit:$limit,sort:$sort,order:$order,query:$query){nodes{hexId,creator{username},name,description,updatedAt,downloadCount,saveCount,target,previewJpgLargeUrl,previewJpgSmallUrl,downloadUrl}pageInfo{itemCount,limit,page,pageCount}}}
-        query = "query%28%24target%3ATarget%2C%24page%3APositiveInt%2C%24limit%3APositiveInt%2C%24sort%3AItemSort%2C%24order%3ASortOrder%2C%24query%3AString%29%7BswitchThemes%28target%3A%24target%2Cpage%3A%24page%2Climit%3A%24limit%2Csort%3A%24sort%2Corder%3A%24order%2Cquery%3A%24query%29%7Bnodes%7BhexId%2Ccreator%7Busername%7D%2Cname%2Cdescription%2CupdatedAt%2CdownloadCount%2CsaveCount%2Ctarget%2CpreviewJpgLargeUrl%2CpreviewJpgSmallUrl%2CdownloadUrl%7DpageInfo%7BitemCount%2Climit%2Cpage%2CpageCount%7D%7D%7D";
+        // query($target:Target,$page:PositiveInt,$limit:PositiveInt,$sort:ItemSort,$order:SortOrder,$query:String){switch{themes(target:$target,page:$page,limit:$limit,sort:$sort,order:$order,query:$query){nodes{hexId,creator{username},name,description,updatedAt,downloadCount,saveCount,target,previewJpgLargeUrl,previewJpgSmallUrl,downloadUrl}pageInfo{itemCount,limit,page,pageCount}}}}
+        query = "query%28%24target%3ATarget%2C%24page%3APositiveInt%2C%24limit%3APositiveInt%2C%24sort%3AItemSort%2C%24order%3ASortOrder%2C%24query%3AString%29%7Bswitch%7Bthemes%28target%3A%24target%2Cpage%3A%24page%2Climit%3A%24limit%2Csort%3A%24sort%2Corder%3A%24order%2Cquery%3A%24query%29%7Bnodes%7BhexId%2Ccreator%7Busername%7D%2Cname%2Cdescription%2CupdatedAt%2CdownloadCount%2CsaveCount%2Ctarget%2CpreviewJpgLargeUrl%2CpreviewJpgSmallUrl%2CdownloadUrl%7DpageInfo%7BitemCount%2Climit%2Cpage%2CpageCount%7D%7D%7D%7D";
         snprintf(variables, 0x400,"{\"target\":%s,\"page\":%d,\"limit\":%d,\"sort\":\"%s\",\"order\":\"%s\",\"query\":%s}",\
             requestTarget, rI->page, rI->limit, requestSorts[rI->sort], requestOrders[rI->order], searchQuoted);
     }
     else if (rI->target == 8)
     {
-        // query($page:PositiveInt,$limit:PositiveInt,$sort:ItemSort,$order:SortOrder,$query:String){switchPacks(page:$page,limit:$limit,sort:$sort,order:$order,query:$query){nodes{hexId,creator{username},name,description,updatedAt,downloadCount,saveCount,previewJpgLargeUrl,previewJpgSmallUrl,themes{hexId,creator{username},name,description,updatedAt,downloadCount,saveCount,target,previewJpgLargeUrl,previewJpgSmallUrl,downloadUrl}}pageInfo{itemCount,limit,page,pageCount}}}
-        query = "query%28%24page%3APositiveInt%2C%24limit%3APositiveInt%2C%24sort%3AItemSort%2C%24order%3ASortOrder%2C%24query%3AString%29%7BswitchPacks%28page%3A%24page%2Climit%3A%24limit%2Csort%3A%24sort%2Corder%3A%24order%2Cquery%3A%24query%29%7Bnodes%7BhexId%2Ccreator%7Busername%7D%2Cname%2Cdescription%2CupdatedAt%2CdownloadCount%2CsaveCount%2CpreviewJpgLargeUrl%2CpreviewJpgSmallUrl%2Cthemes%7BhexId%2Ccreator%7Busername%7D%2Cname%2Cdescription%2CupdatedAt%2CdownloadCount%2CsaveCount%2Ctarget%2CpreviewJpgLargeUrl%2CpreviewJpgSmallUrl%2CdownloadUrl%7D%7DpageInfo%7BitemCount%2Climit%2Cpage%2CpageCount%7D%7D%7D";
+        // query($page:PositiveInt,$limit:PositiveInt,$sort:ItemSort,$order:SortOrder,$query:String){switch{packs(page:$page,limit:$limit,sort:$sort,order:$order,query:$query){nodes{hexId,creator{username},name,description,updatedAt,downloadCount,saveCount,previewJpgLargeUrl,previewJpgSmallUrl,themes{hexId,creator{username},name,description,updatedAt,downloadCount,saveCount,target,previewJpgLargeUrl,previewJpgSmallUrl,downloadUrl}}pageInfo{itemCount,limit,page,pageCount}}}}
+        query = "query%28%24page%3APositiveInt%2C%24limit%3APositiveInt%2C%24sort%3AItemSort%2C%24order%3ASortOrder%2C%24query%3AString%29%7Bswitch%7Bpacks%28page%3A%24page%2Climit%3A%24limit%2Csort%3A%24sort%2Corder%3A%24order%2Cquery%3A%24query%29%7Bnodes%7BhexId%2Ccreator%7Busername%7D%2Cname%2Cdescription%2CupdatedAt%2CdownloadCount%2CsaveCount%2CpreviewJpgLargeUrl%2CpreviewJpgSmallUrl%2Cthemes%7BhexId%2Ccreator%7Busername%7D%2Cname%2Cdescription%2CupdatedAt%2CdownloadCount%2CsaveCount%2Ctarget%2CpreviewJpgLargeUrl%2CpreviewJpgSmallUrl%2CdownloadUrl%7D%7DpageInfo%7BitemCount%2Climit%2Cpage%2CpageCount%7D%7D%7D%7D";
         snprintf(variables, 0x400, "{\"page\":%d,\"limit\":%d,\"sort\":\"%s\",\"order\":\"%s\",\"query\":%s}",\
             rI->page, rI->limit, requestSorts[rI->sort], requestOrders[rI->order], searchQuoted);
     }
@@ -354,55 +354,58 @@ int GenThemeArray(RequestInfo_t *rI){
 
     cJSON *data = cJSON_GetObjectItemCaseSensitive(rI->response, "data");
     if (data){
-        cJSON *queryData;
-        if (rI->target != 8){
-            queryData = cJSON_GetObjectItemCaseSensitive(data, "switchThemes");
-        } else {
-            queryData = cJSON_GetObjectItemCaseSensitive(data, "switchPacks");
-        }
-        cJSON *pagination = cJSON_GetObjectItemCaseSensitive(queryData, "pageInfo");
-        cJSON *page_count = cJSON_GetObjectItemCaseSensitive(pagination, "pageCount");
-        cJSON *item_count = cJSON_GetObjectItemCaseSensitive(pagination, "itemCount");
-
-        if (cJSON_IsNumber(page_count) && cJSON_IsNumber(item_count)){
-            rI->pageCount = page_count->valueint;
-            rI->itemCount = item_count->valueint;
-        }
-        else 
-        {
-            return -1;
-        }
-            
-
-
-        FreeThemes(rI);
-        rI->curPageItemCount = MIN(rI->limit, rI->itemCount - rI->limit * (rI->page - 1));
-
-        if (rI->itemCount <= 0)
-            return 0;
-
-        cJSON *nodes = cJSON_GetObjectItemCaseSensitive(queryData, "nodes");
-        if (rI->target != 8){
-            if (nodes){
-                if (ParseThemeList(&rI->themes, rI->curPageItemCount, nodes))
-                    return -3;
-
-                res = 0;
-                cJSON_Delete(rI->response);
+        cJSON *switchObj = cJSON_GetObjectItemCaseSensitive(data, "switch");
+        if (switchObj) {
+            cJSON *queryData;
+            if (rI->target != 8){
+                queryData = cJSON_GetObjectItemCaseSensitive(switchObj, "themes");
+            } else {
+                queryData = cJSON_GetObjectItemCaseSensitive(switchObj, "packs");
             }
-        }
-        else {
-            if (nodes){
-                if (ParsePackList(&rI->packs, rI->curPageItemCount, nodes)){
-                    printf("Pack parser failed!");
-                    return -3;
+            cJSON *pagination = cJSON_GetObjectItemCaseSensitive(queryData, "pageInfo");
+            cJSON *page_count = cJSON_GetObjectItemCaseSensitive(pagination, "pageCount");
+            cJSON *item_count = cJSON_GetObjectItemCaseSensitive(pagination, "itemCount");
+
+            if (cJSON_IsNumber(page_count) && cJSON_IsNumber(item_count)){
+                rI->pageCount = page_count->valueint;
+                rI->itemCount = item_count->valueint;
+            }
+            else 
+            {
+                return -1;
+            }
+                
+
+
+            FreeThemes(rI);
+            rI->curPageItemCount = MIN(rI->limit, rI->itemCount - rI->limit * (rI->page - 1));
+
+            if (rI->itemCount <= 0)
+                return 0;
+
+            cJSON *nodes = cJSON_GetObjectItemCaseSensitive(queryData, "nodes");
+            if (rI->target != 8){
+                if (nodes){
+                    if (ParseThemeList(&rI->themes, rI->curPageItemCount, nodes))
+                        return -3;
+
+                    res = 0;
+                    cJSON_Delete(rI->response);
                 }
-                    
+            }
+            else {
+                if (nodes){
+                    if (ParsePackList(&rI->packs, rI->curPageItemCount, nodes)){
+                        printf("Pack parser failed!");
+                        return -3;
+                    }
+                        
 
-                FillThemesWithPacks(rI);
+                    FillThemesWithPacks(rI);
 
-                res = 0;
-                cJSON_Delete(rI->response);
+                    res = 0;
+                    cJSON_Delete(rI->response);
+                }
             }
         }
     }
