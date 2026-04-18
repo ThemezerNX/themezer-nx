@@ -39,22 +39,22 @@ char *GenLink(RequestInfo_t *rI){
         searchQuoted = CopyTextUtil("null");
 
     char *requestTarget;
-    if (rI->target < 0 || rI->target >= 7)
+    if (rI->target == 0 || rI->target >= 8)
         requestTarget = CopyTextUtil("null");
     else 
-        requestTarget = CopyTextArgsUtil("\"%s\"",requestTargets[rI->target]);
+        requestTarget = CopyTextArgsUtil("\"%s\"",requestTargets[rI->target - 1]);
     
     static char request[0x600];
     char variables[0x400];
     char *query;
-    if (rI->target <= 7)
+    if (rI->target >= 1)
     {
         // query($target:Target,$page:PositiveInt,$limit:PositiveInt,$sort:ItemSort,$order:SortOrder,$query:String){switch{themes(target:$target,page:$page,limit:$limit,sort:$sort,order:$order,query:$query){nodes{hexId creator{username} name description updatedAt downloadCount saveCount target screenshotThumbHash screenshotPreview{jpgHdUrl jpgThumbUrl} downloadUrl}pageInfo{itemCount limit page pageCount}}}}
         query = "query%28%24target%3ATarget%2C%24page%3APositiveInt%2C%24limit%3APositiveInt%2C%24sort%3AItemSort%2C%24order%3ASortOrder%2C%24query%3AString%29%7Bswitch%7Bthemes%28target%3A%24target%2Cpage%3A%24page%2Climit%3A%24limit%2Csort%3A%24sort%2Corder%3A%24order%2Cquery%3A%24query%29%7Bnodes%7BhexId%20creator%7Busername%7D%20name%20description%20updatedAt%20downloadCount%20saveCount%20target%20screenshotThumbHash%20screenshotPreview%7BjpgHdUrl%20jpgThumbUrl%7D%20downloadUrl%7DpageInfo%7BitemCount%20limit%20page%20pageCount%7D%7D%7D%7D";
         snprintf(variables, 0x400,"{\"target\":%s,\"page\":%d,\"limit\":%d,\"sort\":\"%s\",\"order\":\"%s\",\"query\":%s}",\
             requestTarget, rI->page, rI->limit, requestSorts[rI->sort], requestOrders[rI->order], searchQuoted);
     }
-    else if (rI->target == 8)
+    else if (rI->target == 0)
     {
         // query($page:PositiveInt,$limit:PositiveInt,$sort:ItemSort,$order:SortOrder,$query:String){switch{packs(page:$page,limit:$limit,sort:$sort,order:$order,query:$query){nodes{hexId creator{username} name description updatedAt downloadCount saveCount collageThumbHash collagePreview{jpgHdUrl jpgThumbUrl} themes{hexId creator{username} name description updatedAt downloadCount saveCount target screenshotThumbHash screenshotPreview{jpgHdUrl jpgThumbUrl} downloadUrl}}pageInfo{itemCount limit page pageCount}}}}
         query = "query%28%24page%3APositiveInt%2C%24limit%3APositiveInt%2C%24sort%3AItemSort%2C%24order%3ASortOrder%2C%24query%3AString%29%7Bswitch%7Bpacks%28page%3A%24page%2Climit%3A%24limit%2Csort%3A%24sort%2Corder%3A%24order%2Cquery%3A%24query%29%7Bnodes%7BhexId%20creator%7Busername%7D%20name%20description%20updatedAt%20downloadCount%20saveCount%20collageThumbHash%20collagePreview%7BjpgHdUrl%20jpgThumbUrl%7D%20themes%7BhexId%20creator%7Busername%7D%20name%20description%20updatedAt%20downloadCount%20saveCount%20target%20screenshotThumbHash%20screenshotPreview%7BjpgHdUrl%20jpgThumbUrl%7D%20downloadUrl%7D%7DpageInfo%7BitemCount%20limit%20page%20pageCount%7D%7D%7D%7D";
@@ -404,7 +404,7 @@ int GenThemeArray(RequestInfo_t *rI){
         cJSON *switchObj = cJSON_GetObjectItemCaseSensitive(data, "switch");
         if (switchObj) {
             cJSON *queryData;
-            if (rI->target != 8){
+            if (rI->target != 0){
                 queryData = cJSON_GetObjectItemCaseSensitive(switchObj, "themes");
             } else {
                 queryData = cJSON_GetObjectItemCaseSensitive(switchObj, "packs");
@@ -431,7 +431,7 @@ int GenThemeArray(RequestInfo_t *rI){
                 return 0;
 
             cJSON *nodes = cJSON_GetObjectItemCaseSensitive(queryData, "nodes");
-            if (rI->target != 8){
+            if (rI->target != 0){
                 if (nodes){
                     if (ParseThemeList(&rI->themes, rI->curPageItemCount, nodes))
                         return -3;
@@ -624,7 +624,7 @@ int HandleDownloadQueue(Context_t *ctx){
 }
 
 void SetDefaultsRequestInfo(RequestInfo_t *rI){
-    rI->target = 7;
+    rI->target = 8;
     rI->limit = 12;
     rI->page = 1;
     rI->sort = 3;

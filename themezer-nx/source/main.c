@@ -51,7 +51,7 @@ int main(int argc, char* argv[])
 
     RequestInfo_t rI = {0, 0, 0, 0, 0, 0, "", 0, 0, 0, NULL, NULL, {NULL, 0, NULL, true}, NULL};
     SetDefaultsRequestInfo(&rI);
-    rI.target = 8;
+    rI.target = 0;
     ShapeLinker_t *items = NULL;
 
     AllocateInstalls(7);

@@ -125,7 +125,7 @@ int ThemeSelect(Context_t *ctx){
     if (target->preview == NULL)
         return 0;
 
-    if (rI->target == 8)
+    if (rI->target == 0)
         return ShowPackDetails(ctx);
 
     int w, h, update = 1;

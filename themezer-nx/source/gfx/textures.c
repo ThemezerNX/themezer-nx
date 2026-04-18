@@ -18,15 +18,15 @@ void InitTextures(){
     logo = LoadImageSDL("romfs:/logo.png");
 
     // Target Icons
-    targetIcons[0] = LoadImageSDL("romfs:/targetIcons/home.png");
-    targetIcons[1] = LoadImageSDL("romfs:/targetIcons/lock.png");
-    targetIcons[2] = LoadImageSDL("romfs:/targetIcons/apps.png");
-    targetIcons[3] = LoadImageSDL("romfs:/targetIcons/settings.png");
-    targetIcons[4] = LoadImageSDL("romfs:/targetIcons/psl.png");
-    targetIcons[5] = LoadImageSDL("romfs:/targetIcons/user.png");
-    targetIcons[6] = LoadImageSDL("romfs:/targetIcons/news.png");
-    targetIcons[7] = LoadImageSDL("romfs:/targetIcons/all.png");
-    targetIcons[8] = LoadImageSDL("romfs:/targetIcons/packs.png");
+    targetIcons[0] = LoadImageSDL("romfs:/targetIcons/packs.png");
+    targetIcons[1] = LoadImageSDL("romfs:/targetIcons/home.png");
+    targetIcons[2] = LoadImageSDL("romfs:/targetIcons/lock.png");
+    targetIcons[3] = LoadImageSDL("romfs:/targetIcons/apps.png");
+    targetIcons[4] = LoadImageSDL("romfs:/targetIcons/settings.png");
+    targetIcons[5] = LoadImageSDL("romfs:/targetIcons/psl.png");
+    targetIcons[6] = LoadImageSDL("romfs:/targetIcons/user.png");
+    targetIcons[7] = LoadImageSDL("romfs:/targetIcons/news.png");
+    targetIcons[8] = LoadImageSDL("romfs:/targetIcons/all.png");
 
     // Filter Icons
     sortIcons[0] = LoadImageSDL("romfs:/filterIcons/updated.png");
