@@ -1,6 +1,6 @@
 #include "gfx.h"
 
-SDL_Texture *menuIcon, *searchIcon, *setIcon, *arrowLIcon, *arrowRIcon, *LeImg, *XIcon, *loadingScreen, *logo;
+SDL_Texture *menuIcon, *searchIcon, *setIcon, *arrowLIcon, *arrowRIcon, *LeImg, *XIcon, *logo;
 SDL_Texture *targetIcons[9];
 SDL_Texture *sortIcons[4];
 SDL_Texture *orderIcons[2];
@@ -14,7 +14,6 @@ void InitTextures(){
     arrowRIcon = LoadImageSDL("romfs:/arrowR.png");
     LeImg = LoadImageSDL("romfs:/lenny.png");
     XIcon = LoadImageSDL("romfs:/x.png");
-    loadingScreen = LoadImageSDL("romfs:/loading.png");
     logo = LoadImageSDL("romfs:/logo.png");
 
     // Target Icons
@@ -48,7 +47,6 @@ void DestroyTextures(){
     SDL_DestroyTexture(arrowRIcon);
     SDL_DestroyTexture(LeImg);
     SDL_DestroyTexture(XIcon);
-    SDL_DestroyTexture(loadingScreen);
     SDL_DestroyTexture(logo);
 
     // Target Icons

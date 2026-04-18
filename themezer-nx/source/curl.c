@@ -468,7 +468,7 @@ ShapeLinker_t *GenListItemList(RequestInfo_t *rI){
     printf("Gen: ArraySize: %d", rI->curPageItemCount);
 
     for (int i = 0; i < rI->curPageItemCount; i++){
-        ShapeLinkAdd(&link, ListItemCreate(COLOR(255,255,255,255), COLOR(170, 170, 170, 255), (rI->themes[i].preview) ? rI->themes[i].preview : loadingScreen, rI->themes[i].name, rI->themes[i].creator), ListItemType);
+        ShapeLinkAdd(&link, ListItemCreate(COLOR(255,255,255,255), COLOR(170, 170, 170, 255), rI->themes[i].preview, rI->themes[i].name, rI->themes[i].creator), ListItemType);
     }
 
     return link;
