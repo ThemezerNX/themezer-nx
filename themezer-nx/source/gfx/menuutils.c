@@ -88,6 +88,51 @@ int ShowConnErrMenu(int res){
     return 0;
 }
 
+void UpdateMainMenuUI(Context_t *ctx, RequestInfo_t *rI, ShapeLinker_t *items, char *emptyMessage){
+    ShapeLinker_t *all = ctx->all;
+    ListGrid_t *gv = ShapeLinkFind(all, ListGridType)->item;
+    TextCentered_t *pageText = ShapeLinkFind(all, TextCenteredType)->item;
+
+    if (gv->text)
+        ShapeLinkDispose(&gv->text);
+    gv->text = items;
+    SETBIT(gv->options, LIST_DISABLED, !items);
+    gv->highlight = 0;
+
+    free(pageText->text.text);
+    pageText->text.text = CopyTextArgsUtil("%d/%d (%d)", rI->page, rI->pageCount, rI->itemCount);
+
+    TextCentered_t *emptyText = ShapeLinkOffset(all, 3)->item;
+    free(emptyText->text.text);
+    emptyText->text.text = CopyTextUtil(emptyMessage);
+
+    int offset = (GetInstallButtonState()) ? 10 : 8;
+    Button_t *leftButton = ShapeLinkOffset(all, offset)->item;
+    Glyph_t *leftButtonIcon = ShapeLinkOffset(all, offset + 11)->item;
+    Button_t *rightButton = ShapeLinkOffset(all, offset + 3)->item;
+    Glyph_t *rightButtonIcon = ShapeLinkOffset(all, offset + 12)->item;
+
+    if (rI->page > 1) {
+        leftButton->secondary = COLOR_BTNPAGINATION;
+        SETBIT(leftButtonIcon->options, TEXT_GLYPH_NO_RENDER, 0);
+    } else {
+        leftButton->secondary = COLOR_TOPBARBUTTONS;
+        SETBIT(leftButtonIcon->options, TEXT_GLYPH_NO_RENDER, 1);
+    }
+    if (rI->page < rI->pageCount) {
+        rightButton->secondary = COLOR_BTNPAGINATION;
+        SETBIT(rightButtonIcon->options, TEXT_GLYPH_NO_RENDER, 0);
+    } else {
+        rightButton->secondary = COLOR_TOPBARBUTTONS;
+        SETBIT(rightButtonIcon->options, TEXT_GLYPH_NO_RENDER, 1);
+    }
+}
+
+void ShowLoadingPageUI(Context_t *ctx, RequestInfo_t *rI){
+    UpdateMainMenuUI(ctx, rI, NULL, "Loading...");
+    RenderShapeLinkList(ctx->all);
+}
+
 int MakeRequestAsCtx(Context_t *ctx, RequestInfo_t *rI){
     ShapeLinker_t *items = NULL;
     int res = -1;
@@ -102,44 +147,7 @@ int MakeRequestAsCtx(Context_t *ctx, RequestInfo_t *rI){
             items = GenListItemList(rI);
             AddThemeImagesToDownloadQueue(rI, true);
 
-            // Update pagination text
-            ShapeLinker_t *all = ctx->all;
-            ListGrid_t *gv = ShapeLinkFind(all, ListGridType)->item;
-            TextCentered_t *pageText = ShapeLinkFind(all, TextCenteredType)->item;
-            if (gv->text)
-                ShapeLinkDispose(&gv->text);
-            
-            gv->text = items;
-            SETBIT(gv->options, LIST_DISABLED, !items);
-            gv->highlight = 0;
-            free(pageText->text.text);
-            pageText->text.text = CopyTextArgsUtil("%d/%d (%d)", rI->page, rI->pageCount, rI->itemCount);
-
-            // Update pagination buttons
-            //10, 13
-            int offset = (GetInstallButtonState()) ? 10 : 8;
-
-            Button_t *leftButton = ShapeLinkOffset(all, offset)->item;
-            Glyph_t *leftButtonIcon = ShapeLinkOffset(all, offset + 11)->item;
-            Button_t *rightButton = ShapeLinkOffset(all, offset + 3)->item;
-            Glyph_t *rightButtonIcon = ShapeLinkOffset(all, offset + 12)->item;
-
-            // Left end
-            if (rI->page > 1) {
-                leftButton->secondary = COLOR_BTNPAGINATION;
-                SETBIT(leftButtonIcon->options, TEXT_GLYPH_NO_RENDER, 0);
-            } else {
-                leftButton->secondary = COLOR_TOPBARBUTTONS;
-                SETBIT(leftButtonIcon->options, TEXT_GLYPH_NO_RENDER, 1);
-            }
-            // Right end
-            if (rI->page < rI->pageCount) {
-                rightButton->secondary = COLOR_BTNPAGINATION;
-                SETBIT(rightButtonIcon->options, TEXT_GLYPH_NO_RENDER, 0);
-            } else {
-                rightButton->secondary = COLOR_TOPBARBUTTONS;
-                SETBIT(rightButtonIcon->options, TEXT_GLYPH_NO_RENDER, 1);
-            }
+            UpdateMainMenuUI(ctx, rI, items, "X.X There seem to be no themes here!");
         }
     }
     else {

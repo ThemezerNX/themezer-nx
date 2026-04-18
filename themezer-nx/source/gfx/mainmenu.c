@@ -18,6 +18,7 @@ int NextPageButton(Context_t *ctx){
     }
 
     rI->page++;
+    ShowLoadingPageUI(ctx, rI);
 
     if (MakeRequestAsCtx(ctx,rI))
         rI->page--;
@@ -34,6 +35,7 @@ int PrevPageButton(Context_t *ctx){
     }
 
     rI->page--;
+    ShowLoadingPageUI(ctx, rI);
 
     if (MakeRequestAsCtx(ctx,rI))
         rI->page++;
