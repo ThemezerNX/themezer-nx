@@ -16,7 +16,7 @@ ShapeLinker_t *CreatePackDetailsMenu(ShapeLinker_t *items, RequestInfo_t *rI){
 int ShowPackDetails(Context_t *ctx){
     ListGrid_t *gv = ShapeLinkFind(ctx->all, ListGridType)->item;
     RequestInfo_t *rI = ShapeLinkFind(ctx->all, DataType)->item;
-    RequestInfo_t customRI = {3, 0, 0, 0, 0, 0, NULL, 0, 0, rI->packs[gv->highlight].themeCount, NULL, rI->packs[gv->highlight].themes, {NULL, 0, NULL, 1}, NULL};
+    RequestInfo_t customRI = {12, 0, 0, 0, 0, 0, NULL, 0, 0, rI->packs[gv->highlight].themeCount, NULL, rI->packs[gv->highlight].themes, {NULL, 0, NULL, 1}, NULL};
 
     printf("Showing pack details...\nCount: %d\nEntry: %d\n", rI->packs[gv->highlight].themeCount, gv->highlight);
 

@@ -34,10 +34,6 @@ int ShowSideTargetMenu(Context_t *ctx){
             int tempPage = rI->page;
             SetDefaultsRequestInfo(rI);
             rI->target = selection;
-            if (selection == 8){
-                rI->maxDls = 3;
-                rI->limit = 12;
-            }
             printf("Making request...\n");
             if (MakeRequestAsCtx(ctx, rI)){
                 rI->target = tempTarget;
