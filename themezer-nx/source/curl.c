@@ -46,15 +46,15 @@ char *GenLink(RequestInfo_t *rI){
     char *query;
     if (rI->target <= 7)
     {
-        // query($target:Target,$page:PositiveInt,$limit:PositiveInt,$sort:ItemSort,$order:SortOrder,$query:String){switch{themes(target:$target,page:$page,limit:$limit,sort:$sort,order:$order,query:$query){nodes{hexId,creator{username},name,description,updatedAt,downloadCount,saveCount,target,previewJpgLargeUrl,previewJpgSmallUrl,downloadUrl}pageInfo{itemCount,limit,page,pageCount}}}}
-        query = "query%28%24target%3ATarget%2C%24page%3APositiveInt%2C%24limit%3APositiveInt%2C%24sort%3AItemSort%2C%24order%3ASortOrder%2C%24query%3AString%29%7Bswitch%7Bthemes%28target%3A%24target%2Cpage%3A%24page%2Climit%3A%24limit%2Csort%3A%24sort%2Corder%3A%24order%2Cquery%3A%24query%29%7Bnodes%7BhexId%2Ccreator%7Busername%7D%2Cname%2Cdescription%2CupdatedAt%2CdownloadCount%2CsaveCount%2Ctarget%2CpreviewJpgLargeUrl%2CpreviewJpgSmallUrl%2CdownloadUrl%7DpageInfo%7BitemCount%2Climit%2Cpage%2CpageCount%7D%7D%7D%7D";
+        // query($target:Target,$page:PositiveInt,$limit:PositiveInt,$sort:ItemSort,$order:SortOrder,$query:String){switch{themes(target:$target,page:$page,limit:$limit,sort:$sort,order:$order,query:$query){nodes{hexId creator{username} name description updatedAt downloadCount saveCount target screenshotPreview{jpgHdUrl jpgThumbUrl} downloadUrl}pageInfo{itemCount limit page pageCount}}}}
+        query = "query%28%24target%3ATarget%2C%24page%3APositiveInt%2C%24limit%3APositiveInt%2C%24sort%3AItemSort%2C%24order%3ASortOrder%2C%24query%3AString%29%7Bswitch%7Bthemes%28target%3A%24target%2Cpage%3A%24page%2Climit%3A%24limit%2Csort%3A%24sort%2Corder%3A%24order%2Cquery%3A%24query%29%7Bnodes%7BhexId%20creator%7Busername%7D%20name%20description%20updatedAt%20downloadCount%20saveCount%20target%20screenshotPreview%7BjpgHdUrl%20jpgThumbUrl%7D%20downloadUrl%7DpageInfo%7BitemCount%20limit%20page%20pageCount%7D%7D%7D%7D";
         snprintf(variables, 0x400,"{\"target\":%s,\"page\":%d,\"limit\":%d,\"sort\":\"%s\",\"order\":\"%s\",\"query\":%s}",\
             requestTarget, rI->page, rI->limit, requestSorts[rI->sort], requestOrders[rI->order], searchQuoted);
     }
     else if (rI->target == 8)
     {
-        // query($page:PositiveInt,$limit:PositiveInt,$sort:ItemSort,$order:SortOrder,$query:String){switch{packs(page:$page,limit:$limit,sort:$sort,order:$order,query:$query){nodes{hexId,creator{username},name,description,updatedAt,downloadCount,saveCount,previewJpgLargeUrl,previewJpgSmallUrl,themes{hexId,creator{username},name,description,updatedAt,downloadCount,saveCount,target,previewJpgLargeUrl,previewJpgSmallUrl,downloadUrl}}pageInfo{itemCount,limit,page,pageCount}}}}
-        query = "query%28%24page%3APositiveInt%2C%24limit%3APositiveInt%2C%24sort%3AItemSort%2C%24order%3ASortOrder%2C%24query%3AString%29%7Bswitch%7Bpacks%28page%3A%24page%2Climit%3A%24limit%2Csort%3A%24sort%2Corder%3A%24order%2Cquery%3A%24query%29%7Bnodes%7BhexId%2Ccreator%7Busername%7D%2Cname%2Cdescription%2CupdatedAt%2CdownloadCount%2CsaveCount%2CpreviewJpgLargeUrl%2CpreviewJpgSmallUrl%2Cthemes%7BhexId%2Ccreator%7Busername%7D%2Cname%2Cdescription%2CupdatedAt%2CdownloadCount%2CsaveCount%2Ctarget%2CpreviewJpgLargeUrl%2CpreviewJpgSmallUrl%2CdownloadUrl%7D%7DpageInfo%7BitemCount%2Climit%2Cpage%2CpageCount%7D%7D%7D%7D";
+        // query($page:PositiveInt,$limit:PositiveInt,$sort:ItemSort,$order:SortOrder,$query:String){switch{packs(page:$page,limit:$limit,sort:$sort,order:$order,query:$query){nodes{hexId creator{username} name description updatedAt downloadCount saveCount collagePreview{jpgHdUrl jpgThumbUrl} themes{hexId creator{username} name description updatedAt downloadCount saveCount target screenshotPreview{jpgHdUrl jpgThumbUrl} downloadUrl}}pageInfo{itemCount limit page pageCount}}}}
+        query = "query%28%24page%3APositiveInt%2C%24limit%3APositiveInt%2C%24sort%3AItemSort%2C%24order%3ASortOrder%2C%24query%3AString%29%7Bswitch%7Bpacks%28page%3A%24page%2Climit%3A%24limit%2Csort%3A%24sort%2Corder%3A%24order%2Cquery%3A%24query%29%7Bnodes%7BhexId%20creator%7Busername%7D%20name%20description%20updatedAt%20downloadCount%20saveCount%20collagePreview%7BjpgHdUrl%20jpgThumbUrl%7D%20themes%7BhexId%20creator%7Busername%7D%20name%20description%20updatedAt%20downloadCount%20saveCount%20target%20screenshotPreview%7BjpgHdUrl%20jpgThumbUrl%7D%20downloadUrl%7D%7DpageInfo%7BitemCount%20limit%20page%20pageCount%7D%7D%7D%7D";
         snprintf(variables, 0x400, "{\"page\":%d,\"limit\":%d,\"sort\":\"%s\",\"order\":\"%s\",\"query\":%s}",\
             rI->page, rI->limit, requestSorts[rI->sort], requestOrders[rI->order], searchQuoted);
     }
@@ -88,6 +88,17 @@ int GetIndexOfStrArr(const char **toSearch, int limit, const char *search){
     }
 
     return 0;
+}
+
+static int GetPreviewUrls(cJSON *item, const char *fieldName, cJSON **original, cJSON **thumb){
+    cJSON *preview = cJSON_GetObjectItemCaseSensitive(item, fieldName);
+    if (!cJSON_IsObject(preview))
+        return 0;
+
+    *original = cJSON_GetObjectItemCaseSensitive(preview, "jpgHdUrl");
+    *thumb = cJSON_GetObjectItemCaseSensitive(preview, "jpgThumbUrl");
+
+    return cJSON_IsString(*original) && cJSON_IsString(*thumb);
 }
 
 #define CHUNK_SIZE 8192
@@ -263,13 +274,13 @@ int ParseThemeList(ThemeInfo_t **storage, int size, cJSON *themesList){
         cJSON *last_updated = cJSON_GetObjectItemCaseSensitive(theme, "updatedAt");
         cJSON *dl_count = cJSON_GetObjectItemCaseSensitive(theme, "downloadCount");
         cJSON *like_count = cJSON_GetObjectItemCaseSensitive(theme, "saveCount");
-        cJSON *original = cJSON_GetObjectItemCaseSensitive(theme, "previewJpgLargeUrl");
-        cJSON *thumb = cJSON_GetObjectItemCaseSensitive(theme, "previewJpgSmallUrl");
+        cJSON *original = NULL;
+        cJSON *thumb = NULL;
         cJSON *download = cJSON_GetObjectItemCaseSensitive(theme, "downloadUrl");
         cJSON *target = cJSON_GetObjectItemCaseSensitive(theme, "target");
 
-        if (cJSON_IsNumber(dl_count) && cJSON_IsNumber(like_count) && cJSON_IsString(last_updated) && (cJSON_IsString(description) || cJSON_IsNull(description)) &&\
-        cJSON_IsString(name) && cJSON_IsString(display_name) && cJSON_IsString(id) && cJSON_IsString(original) && cJSON_IsString(thumb) && cJSON_IsString(target) &&
+        if (GetPreviewUrls(theme, "screenshotPreview", &original, &thumb) && cJSON_IsNumber(dl_count) && cJSON_IsNumber(like_count) && cJSON_IsString(last_updated) && (cJSON_IsString(description) || cJSON_IsNull(description)) &&\
+        cJSON_IsString(name) && cJSON_IsString(display_name) && cJSON_IsString(id) && cJSON_IsString(target) &&
         cJSON_IsString(download) && cJSON_IsString(target)){
             themes[i].dlCount = dl_count->valueint;
             themes[i].likeCount = like_count->valueint;
@@ -307,12 +318,11 @@ int ParsePackList(PackInfo_t **storage, int size, cJSON *packList){
         cJSON *creator = cJSON_GetObjectItemCaseSensitive(pack, "creator");
         cJSON *display_name = cJSON_GetObjectItemCaseSensitive(creator, "username");
         cJSON *name = cJSON_GetObjectItemCaseSensitive(pack, "name");
-        cJSON *original = cJSON_GetObjectItemCaseSensitive(pack, "previewJpgLargeUrl");
-        cJSON *thumb = cJSON_GetObjectItemCaseSensitive(pack, "previewJpgSmallUrl");
+        cJSON *original = NULL;
+        cJSON *thumb = NULL;
         cJSON *themes = cJSON_GetObjectItemCaseSensitive(pack, "themes");
 
-        if (cJSON_IsString(name) && cJSON_IsString(display_name) && cJSON_IsArray(themes) &&
-            cJSON_IsString(original) && cJSON_IsString(thumb)){
+        if (GetPreviewUrls(pack, "collagePreview", &original, &thumb) && cJSON_IsString(name) && cJSON_IsString(display_name) && cJSON_IsArray(themes)){
             packs[i].creator = SanitizeString(display_name->valuestring);
             packs[i].name = SanitizeString(name->valuestring);
             packs[i].imgLink = CopyTextUtil(original->valuestring);
