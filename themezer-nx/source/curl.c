@@ -480,14 +480,30 @@ int AddThemeImagesToDownloadQueue(RequestInfo_t *rI, bool thumb){
         
     rI->tInfo.transfers = calloc(sizeof(Transfer_t), rI->curPageItemCount);
     rI->tInfo.transferer = curl_multi_init();
+    if (!rI->tInfo.transfers || !rI->tInfo.transferer){
+        free(rI->tInfo.transfers);
+        if (rI->tInfo.transferer)
+            curl_multi_cleanup(rI->tInfo.transferer);
+        rI->tInfo.transfers = NULL;
+        rI->tInfo.transferer = NULL;
+        rI->tInfo.queueOffset = 0;
+        rI->tInfo.finished = true;
+        return 1;
+    }
+
+    rI->tInfo.queueOffset = rI->curPageItemCount;
     rI->tInfo.finished = false;
     curl_multi_setopt(rI->tInfo.transferer, CURLMOPT_MAXCONNECTS, (long)rI->maxDls);
     curl_multi_setopt(rI->tInfo.transferer, CURLMOPT_MAX_TOTAL_CONNECTIONS, (long)rI->maxDls);
+    curl_multi_setopt(rI->tInfo.transferer, CURLMOPT_MAX_HOST_CONNECTIONS, (long)rI->maxDls);
     curl_multi_setopt(rI->tInfo.transferer, CURLMOPT_PIPELINING, CURLPIPE_MULTIPLEX);
 
     for (int i = 0; i < rI->curPageItemCount; i++){
             rI->tInfo.transfers[i].transfer = CreateRequest((thumb) ? rI->themes[i].thumbLink : rI->themes[i].imgLink, &rI->tInfo.transfers[i].data);
             rI->tInfo.transfers[i].index = i;
+            if (!rI->tInfo.transfers[i].transfer)
+                continue;
+
             curl_easy_setopt(rI->tInfo.transfers[i].transfer, CURLOPT_PRIVATE, &rI->tInfo.transfers[i].index); 
             curl_multi_add_handle(rI->tInfo.transferer, rI->tInfo.transfers[i].transfer);
     }
@@ -499,14 +515,27 @@ int CleanupTransferInfo(RequestInfo_t *rI){
     if (rI->tInfo.finished)
         return 0;
 
-    for (int i = 0; i < rI->tInfo.queueOffset; i++){
-        curl_multi_remove_handle(rI->tInfo.transferer, rI->tInfo.transfers[i].transfer);
-        curl_easy_cleanup(rI->tInfo.transfers[i].transfer);
-        free(rI->tInfo.transfers[i].data.buffer);
+    if (!rI->tInfo.transfers && !rI->tInfo.transferer){
+        rI->tInfo.finished = true;
+        return 0;
     }
 
-    curl_multi_cleanup(rI->tInfo.transferer);
+    for (int i = 0; i < rI->tInfo.queueOffset; i++){
+        if (rI->tInfo.transferer && rI->tInfo.transfers[i].transfer){
+            curl_multi_remove_handle(rI->tInfo.transferer, rI->tInfo.transfers[i].transfer);
+            curl_easy_cleanup(rI->tInfo.transfers[i].transfer);
+        }
+
+        free(rI->tInfo.transfers[i].data.buffer);
+        rI->tInfo.transfers[i].data.buffer = NULL;
+    }
+
+    if (rI->tInfo.transferer)
+        curl_multi_cleanup(rI->tInfo.transferer);
     free(rI->tInfo.transfers);
+    rI->tInfo.transferer = NULL;
+    rI->tInfo.transfers = NULL;
+    rI->tInfo.queueOffset = 0;
     rI->tInfo.finished = true;
     return 0;
 }
@@ -528,39 +557,63 @@ int HandleDownloadQueue(Context_t *ctx){
     if (rI->tInfo.finished)
         return 0;
 
-    int running_handles = 1;
-    curl_multi_perform(rI->tInfo.transferer, &running_handles);
+    int running_handles = 0;
+    int pump_iterations = 0;
+    CURLMcode multi_res = CURLM_OK;
 
-    int msgs_left = -1;
-    struct CURLMsg *msg;
-    while ((msg = curl_multi_info_read(rI->tInfo.transferer, &msgs_left))){
-        if (msg->msg == CURLMSG_DONE){
-            CURL *e = msg->easy_handle;
-            int *index;
-            curl_easy_getinfo(e, CURLINFO_PRIVATE, &index);
+    do {
+        multi_res = curl_multi_perform(rI->tInfo.transferer, &running_handles);
 
-            if (msg->data.result != CURLE_OK){
-                printf("Something went wrong with the downloader, index %d, %d\n", *index, msg->data.result);
-            }
-            else {
-                printf("Download of index %d finished!\n", *index);
-                get_request_t *req = &rI->tInfo.transfers[*index].data;
-                SDL_Texture *oldPreview = rI->themes[*index].preview;
-                rI->themes[*index].preview = LoadImageMemSDL(req->buffer, req->len);
-                if (rI->packs != NULL)
-                    rI->packs[*index].preview = rI->themes[*index].preview;
-                if (gvLink != NULL){
-                    ListItem_t *li = ShapeLinkOffset(gv->text, *index)->item;
-                    li->leftImg = rI->themes[*index].preview;
+        int msgs_left = -1;
+        struct CURLMsg *msg;
+        while ((msg = curl_multi_info_read(rI->tInfo.transferer, &msgs_left))){
+            if (msg->msg == CURLMSG_DONE){
+                CURL *e = msg->easy_handle;
+                int *index;
+                curl_easy_getinfo(e, CURLINFO_PRIVATE, &index);
+
+                if (msg->data.result != CURLE_OK){
+                    printf("Something went wrong with the downloader, index %d, %d\n", *index, msg->data.result);
                 }
                 else {
-                    img->texture = rI->themes[*index].preview;
+                    printf("Download of index %d finished!\n", *index);
+                    get_request_t *req = &rI->tInfo.transfers[*index].data;
+                    SDL_Texture *oldPreview = rI->themes[*index].preview;
+                    rI->themes[*index].preview = LoadImageMemSDL(req->buffer, req->len);
+                    if (rI->packs != NULL)
+                        rI->packs[*index].preview = rI->themes[*index].preview;
+                    if (gvLink != NULL){
+                        ListItem_t *li = ShapeLinkOffset(gv->text, *index)->item;
+                        li->leftImg = rI->themes[*index].preview;
+                    }
+                    else {
+                        img->texture = rI->themes[*index].preview;
+                    }
+                    if (oldPreview && oldPreview != rI->themes[*index].preview)
+                        SDL_DestroyTexture(oldPreview);
                 }
-                if (oldPreview && oldPreview != rI->themes[*index].preview)
-                    SDL_DestroyTexture(oldPreview);
-            } 
+
+                curl_multi_remove_handle(rI->tInfo.transferer, e);
+                curl_easy_cleanup(e);
+                rI->tInfo.transfers[*index].transfer = NULL;
+                free(rI->tInfo.transfers[*index].data.buffer);
+                rI->tInfo.transfers[*index].data.buffer = NULL;
+                rI->tInfo.transfers[*index].data.len = 0;
+                rI->tInfo.transfers[*index].data.buflen = 0;
+            }
         }
-    }
+
+        if (multi_res != CURLM_OK || !running_handles)
+            break;
+
+        int numfds = 0;
+        if (++pump_iterations >= 8)
+            break;
+
+        multi_res = curl_multi_wait(rI->tInfo.transferer, NULL, 0, 0, &numfds);
+        if (multi_res != CURLM_OK || numfds == 0)
+            break;
+    } while (1);
 
     if (!running_handles){
         printf("Downloading done!\n");
