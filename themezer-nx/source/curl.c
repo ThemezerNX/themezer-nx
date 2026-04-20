@@ -31,6 +31,127 @@ const char *requestOrders[] = {
     "ASC"
 };
 
+static int GetPreviewUrls(cJSON *item, const char *fieldName, cJSON **original, cJSON **thumb);
+static int ParseThemeList(ThemeInfo_t **storage, int size, cJSON *themesList);
+static SDL_Texture *CreateThumbHashTexture(const char *encodedThumbHash);
+int GetIndexOfStrArr(const char **toSearch, int limit, const char *search);
+
+static char *GenLookupByQuickIdLink(const char *quickId){
+    static char request[0x1200];
+    const char *query = "query($quickId:String!){switch{lookupByQuickId(quickId:$quickId){__typename ... on SwitchPack{name creator{username} collageThumbHash collagePreview{jpgHdUrl jpgThumbUrl} themes{hexId creator{username} name description updatedAt downloadCount saveCount target screenshotThumbHash screenshotPreview{jpgHdUrl jpgThumbUrl} downloadUrl}} ... on SwitchTheme{hexId creator{username} name description updatedAt downloadCount saveCount target screenshotThumbHash screenshotPreview{jpgHdUrl jpgThumbUrl} downloadUrl} ... on SwitchRemoteInstallTheme{author createdAt downloadUrl name quickId target}}}}";
+    char *variables = NULL;
+
+    cJSON *variablesJson = cJSON_CreateObject();
+    if (variablesJson != NULL){
+        cJSON_AddStringToObject(variablesJson, "quickId", quickId);
+        variables = cJSON_PrintUnformatted(variablesJson);
+        cJSON_Delete(variablesJson);
+    }
+
+    CURL *curl = curl_easy_init();
+    if (curl){
+        char *encodedQuery = curl_easy_escape(curl, query, 0);
+        char *encodedVariables = curl_easy_escape(curl, variables ? variables : "{}", 0);
+
+        snprintf(request, sizeof(request), "https://api.themezer.net/graphql?query=%s&variables=%s", encodedQuery ? encodedQuery : query, encodedVariables ? encodedVariables : (variables ? variables : "{}"));
+
+        if (encodedQuery)
+            curl_free(encodedQuery);
+        if (encodedVariables)
+            curl_free(encodedVariables);
+        curl_easy_cleanup(curl);
+    }
+
+    free(variables);
+
+    printf("Request: %s\n\n", request);
+    return request;
+}
+
+static int ParseTheme(ThemeInfo_t *themeInfo, cJSON *theme){
+    cJSON *id = cJSON_GetObjectItemCaseSensitive(theme, "hexId");
+    cJSON *creator = cJSON_GetObjectItemCaseSensitive(theme, "creator");
+    cJSON *display_name = cJSON_GetObjectItemCaseSensitive(creator, "username");
+    cJSON *name = cJSON_GetObjectItemCaseSensitive(theme, "name");
+    cJSON *description = cJSON_GetObjectItemCaseSensitive(theme, "description");
+    cJSON *last_updated = cJSON_GetObjectItemCaseSensitive(theme, "updatedAt");
+    cJSON *dl_count = cJSON_GetObjectItemCaseSensitive(theme, "downloadCount");
+    cJSON *like_count = cJSON_GetObjectItemCaseSensitive(theme, "saveCount");
+    cJSON *original = NULL;
+    cJSON *thumb = NULL;
+    cJSON *thumb_hash = cJSON_GetObjectItemCaseSensitive(theme, "screenshotThumbHash");
+    cJSON *download = cJSON_GetObjectItemCaseSensitive(theme, "downloadUrl");
+    cJSON *target = cJSON_GetObjectItemCaseSensitive(theme, "target");
+
+    if (!GetPreviewUrls(theme, "screenshotPreview", &original, &thumb) || !cJSON_IsString(thumb_hash) || !cJSON_IsNumber(dl_count) || !cJSON_IsNumber(like_count) || !cJSON_IsString(last_updated) ||
+        !(cJSON_IsString(description) || cJSON_IsNull(description)) || !cJSON_IsString(name) || !cJSON_IsString(display_name) || !cJSON_IsString(id) || !cJSON_IsString(download) || !cJSON_IsString(target)){
+        return 1;
+    }
+
+    themeInfo->dlCount = dl_count->valueint;
+    themeInfo->likeCount = like_count->valueint;
+    themeInfo->lastUpdated = CopyTextUtil(last_updated->valuestring);
+    if (!cJSON_IsNull(description))
+        themeInfo->description = CopyTextUtil(description->valuestring);
+
+    themeInfo->name = SanitizeString(name->valuestring);
+    themeInfo->creator = SanitizeString(display_name->valuestring);
+    themeInfo->id = CopyTextUtil(id->valuestring);
+    themeInfo->imgLink = CopyTextUtil(original->valuestring);
+    themeInfo->thumbLink = CopyTextUtil(thumb->valuestring);
+    themeInfo->downloadLink = CopyTextUtil(download->valuestring);
+    themeInfo->target = GetIndexOfStrArr(requestTargets, 7, target->valuestring);
+    themeInfo->preview = CreateThumbHashTexture(thumb_hash->valuestring);
+
+    return 0;
+}
+
+static int ParseRemoteTheme(ThemeInfo_t *themeInfo, cJSON *theme){
+    cJSON *author = cJSON_GetObjectItemCaseSensitive(theme, "author");
+    cJSON *created_at = cJSON_GetObjectItemCaseSensitive(theme, "createdAt");
+    cJSON *download = cJSON_GetObjectItemCaseSensitive(theme, "downloadUrl");
+    cJSON *name = cJSON_GetObjectItemCaseSensitive(theme, "name");
+    cJSON *quick_id = cJSON_GetObjectItemCaseSensitive(theme, "quickId");
+    cJSON *target = cJSON_GetObjectItemCaseSensitive(theme, "target");
+
+    if (!cJSON_IsString(author) || !cJSON_IsString(created_at) || !cJSON_IsString(download) || !cJSON_IsString(name) || !cJSON_IsString(quick_id) || !cJSON_IsString(target))
+        return 1;
+
+    themeInfo->creator = SanitizeString(author->valuestring);
+    themeInfo->name = SanitizeString(name->valuestring);
+    themeInfo->id = CopyTextUtil(quick_id->valuestring);
+    themeInfo->lastUpdated = CopyTextUtil(created_at->valuestring);
+    themeInfo->downloadLink = CopyTextUtil(download->valuestring);
+    themeInfo->target = GetIndexOfStrArr(requestTargets, 7, target->valuestring);
+
+    return 0;
+}
+
+static int ParsePack(PackInfo_t *packInfo, cJSON *pack){
+    cJSON *creator = cJSON_GetObjectItemCaseSensitive(pack, "creator");
+    cJSON *display_name = cJSON_GetObjectItemCaseSensitive(creator, "username");
+    cJSON *name = cJSON_GetObjectItemCaseSensitive(pack, "name");
+    cJSON *original = NULL;
+    cJSON *thumb = NULL;
+    cJSON *thumb_hash = cJSON_GetObjectItemCaseSensitive(pack, "collageThumbHash");
+    cJSON *themes = cJSON_GetObjectItemCaseSensitive(pack, "themes");
+
+    if (!GetPreviewUrls(pack, "collagePreview", &original, &thumb) || !cJSON_IsString(thumb_hash) || !cJSON_IsString(name) || !cJSON_IsString(display_name) || !cJSON_IsArray(themes))
+        return 1;
+
+    packInfo->creator = SanitizeString(display_name->valuestring);
+    packInfo->name = SanitizeString(name->valuestring);
+    packInfo->imgLink = CopyTextUtil(original->valuestring);
+    packInfo->thumbLink = CopyTextUtil(thumb->valuestring);
+    packInfo->preview = CreateThumbHashTexture(thumb_hash->valuestring);
+    packInfo->themeCount = cJSON_GetArraySize(themes);
+
+    if (ParseThemeList(&packInfo->themes, packInfo->themeCount, themes))
+        return 2;
+
+    return 0;
+}
+
 char *GenLink(RequestInfo_t *rI){
     char *searchQuoted;
     if (rI->search[0] != '\0')
@@ -298,42 +419,8 @@ int ParseThemeList(ThemeInfo_t **storage, int size, cJSON *themesList){
     cJSON *theme = NULL;
     int i = 0;
     cJSON_ArrayForEach(theme, themesList){
-        cJSON *id = cJSON_GetObjectItemCaseSensitive(theme, "hexId");
-        cJSON *creator = cJSON_GetObjectItemCaseSensitive(theme, "creator");
-        cJSON *display_name = cJSON_GetObjectItemCaseSensitive(creator, "username");
-        cJSON *name = cJSON_GetObjectItemCaseSensitive(theme, "name");
-        cJSON *description = cJSON_GetObjectItemCaseSensitive(theme, "description");
-        cJSON *last_updated = cJSON_GetObjectItemCaseSensitive(theme, "updatedAt");
-        cJSON *dl_count = cJSON_GetObjectItemCaseSensitive(theme, "downloadCount");
-        cJSON *like_count = cJSON_GetObjectItemCaseSensitive(theme, "saveCount");
-        cJSON *original = NULL;
-        cJSON *thumb = NULL;
-        cJSON *thumb_hash = cJSON_GetObjectItemCaseSensitive(theme, "screenshotThumbHash");
-        cJSON *download = cJSON_GetObjectItemCaseSensitive(theme, "downloadUrl");
-        cJSON *target = cJSON_GetObjectItemCaseSensitive(theme, "target");
-
-        if (GetPreviewUrls(theme, "screenshotPreview", &original, &thumb) && cJSON_IsString(thumb_hash) && cJSON_IsNumber(dl_count) && cJSON_IsNumber(like_count) && cJSON_IsString(last_updated) && (cJSON_IsString(description) || cJSON_IsNull(description)) &&\
-        cJSON_IsString(name) && cJSON_IsString(display_name) && cJSON_IsString(id) && cJSON_IsString(target) &&
-        cJSON_IsString(download) && cJSON_IsString(target)){
-            themes[i].dlCount = dl_count->valueint;
-            themes[i].likeCount = like_count->valueint;
-                    
-            themes[i].lastUpdated = CopyTextUtil(last_updated->valuestring);
-            if (!cJSON_IsNull(description))
-                themes[i].description = CopyTextUtil(description->valuestring);
-                    
-            themes[i].name = SanitizeString(name->valuestring);
-            themes[i].creator = SanitizeString(display_name->valuestring);
-            themes[i].id = CopyTextUtil(id->valuestring);
-            themes[i].imgLink = CopyTextUtil(original->valuestring);
-            themes[i].thumbLink = CopyTextUtil(thumb->valuestring);
-            themes[i].downloadLink = CopyTextUtil(download->valuestring);
-            themes[i].target = GetIndexOfStrArr(requestTargets, 7, target->valuestring);
-            themes[i].preview = CreateThumbHashTexture(thumb_hash->valuestring);
-        }
-        else {
+        if (ParseTheme(&themes[i], theme))
             return 1;
-        }
 
         i++;
     }
@@ -349,29 +436,8 @@ int ParsePackList(PackInfo_t **storage, int size, cJSON *packList){
     int i = 0;
 
     cJSON_ArrayForEach(pack, packList){
-        cJSON *creator = cJSON_GetObjectItemCaseSensitive(pack, "creator");
-        cJSON *display_name = cJSON_GetObjectItemCaseSensitive(creator, "username");
-        cJSON *name = cJSON_GetObjectItemCaseSensitive(pack, "name");
-        cJSON *original = NULL;
-        cJSON *thumb = NULL;
-        cJSON *thumb_hash = cJSON_GetObjectItemCaseSensitive(pack, "collageThumbHash");
-        cJSON *themes = cJSON_GetObjectItemCaseSensitive(pack, "themes");
-
-        if (GetPreviewUrls(pack, "collagePreview", &original, &thumb) && cJSON_IsString(thumb_hash) && cJSON_IsString(name) && cJSON_IsString(display_name) && cJSON_IsArray(themes)){
-            packs[i].creator = SanitizeString(display_name->valuestring);
-            packs[i].name = SanitizeString(name->valuestring);
-            packs[i].imgLink = CopyTextUtil(original->valuestring);
-            packs[i].thumbLink = CopyTextUtil(thumb->valuestring);
-            packs[i].preview = CreateThumbHashTexture(thumb_hash->valuestring);
-            int arraySize = cJSON_GetArraySize(themes);
-            printf("Index: %d, size: %d\n", i, arraySize);
-            packs[i].themeCount = arraySize;
-            if (ParseThemeList(&packs[i].themes, arraySize, themes))
-                return 2;
-        }
-        else {
+        if (ParsePack(&packs[i], pack))
             return 1;
-        }
 
         i++;
     }
@@ -456,6 +522,80 @@ int GenThemeArray(RequestInfo_t *rI){
             }
         }
     }
+
+    return res;
+}
+
+int LookupByQuickId(const char *quickId, RequestInfo_t *rI, QuickIdLookupType_t *lookupType){
+    if (!quickId || !quickId[0] || !rI || !lookupType)
+        return -1;
+
+    *lookupType = QuickIdLookupNone;
+
+    int res = MakeJsonRequest(GenLookupByQuickIdLink(quickId), &rI->response);
+    if (res){
+        ShowConnErrMenu(res);
+        return res;
+    }
+
+    if (hasError(rI->response))
+        return -4;
+
+    cJSON *data = cJSON_GetObjectItemCaseSensitive(rI->response, "data");
+    cJSON *switchObj = cJSON_GetObjectItemCaseSensitive(data, "switch");
+    cJSON *lookupData = cJSON_GetObjectItemCaseSensitive(switchObj, "lookupByQuickId");
+
+    if (!lookupData || cJSON_IsNull(lookupData)){
+        cJSON_Delete(rI->response);
+        rI->response = NULL;
+        return 1;
+    }
+
+    cJSON *typename = cJSON_GetObjectItemCaseSensitive(lookupData, "__typename");
+    if (!cJSON_IsString(typename)){
+        cJSON_Delete(rI->response);
+        rI->response = NULL;
+        return -2;
+    }
+
+    rI->maxDls = 12;
+    rI->curPageItemCount = 1;
+
+    if (!strcmp(typename->valuestring, "SwitchTheme")){
+        rI->themes = calloc(sizeof(ThemeInfo_t), 1);
+        if (!rI->themes)
+            res = -3;
+        else if (ParseTheme(&rI->themes[0], lookupData))
+            res = -3;
+        else
+            *lookupType = QuickIdLookupTheme;
+    }
+    else if (!strcmp(typename->valuestring, "SwitchPack")){
+        rI->packs = calloc(sizeof(PackInfo_t), 1);
+        if (!rI->packs)
+            res = -3;
+        else if (ParsePack(&rI->packs[0], lookupData))
+            res = -3;
+        else {
+            FillThemesWithPacks(rI);
+            *lookupType = QuickIdLookupPack;
+        }
+    }
+    else if (!strcmp(typename->valuestring, "SwitchRemoteInstallTheme")){
+        rI->themes = calloc(sizeof(ThemeInfo_t), 1);
+        if (!rI->themes)
+            res = -3;
+        else if (ParseRemoteTheme(&rI->themes[0], lookupData))
+            res = -3;
+        else
+            *lookupType = QuickIdLookupRemoteTheme;
+    }
+    else {
+        res = -2;
+    }
+
+    cJSON_Delete(rI->response);
+    rI->response = NULL;
 
     return res;
 }

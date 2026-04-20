@@ -28,8 +28,10 @@ int exitFunc(Context_t *ctx);
 int GetInstallButtonState();
 void SetInstallButtonState(int state);
 int ShowCurlError(Context_t *ctx);
+int ShowConnErrMenu(int res);
 
 // packdetails.c
+ShapeLinker_t *CreatePackDetailsMenu(ShapeLinker_t *items, RequestInfo_t *rI);
 int ShowPackDetails(Context_t *ctx);
 
 // target.c
@@ -43,6 +45,7 @@ int ShowSideQueueMenu(Context_t *ctx);
 
 // details.c
 int ThemeSelect(Context_t *ctx);
+int ShowQuickIdLookup(Context_t *ctx);
 
 // mainmenu.c
 int ButtonHandlerMainMenu(Context_t *ctx);

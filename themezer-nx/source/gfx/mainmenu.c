@@ -3,7 +3,7 @@
 int lennify(Context_t *ctx){
     static int lenny = false;
     if (!lenny){
-        ShapeLinkAdd(&ctx->all, ImageCreate(LeImg, POS(386, 0, 170, 60), 0), ImageType);
+        ShapeLinkAdd(&ctx->all, ImageCreate(LeImg, POS(644, 0, 156, 60), 0), ImageType);
         lenny = true;
     }
     return 0;
@@ -60,6 +60,7 @@ int ButtonHandlerMainMenu(Context_t *ctx){
 
 ShapeLinker_t *CreateMainMenu(ShapeLinker_t *listItems, RequestInfo_t *rI) { 
     ShapeLinker_t *out = NULL;
+    int quickIdButtonX = GetInstallButtonState() ? 360 : 240;
 
     ShapeLinkAdd(&out, RectangleCreate(POS(0, 60, SCREEN_W, SCREEN_H - 60), COLOR_MAINBG, 1), RectangleType);
     ShapeLinkAdd(&out, RectangleCreate(POS(0, 0, SCREEN_W, 60), COLOR_TOPBAR, 1), RectangleType);
@@ -85,16 +86,15 @@ ShapeLinker_t *CreateMainMenu(ShapeLinker_t *listItems, RequestInfo_t *rI) {
         ShapeLinkAdd(&out, ImageCreate(queueIcon, POS(270, 0, 60, 60), 0), ImageType);
     }
 
-    // SortButton
-    //ShapeLinkAdd(&out, ButtonCreate(POS(360, 0, 120, 60), COLOR_TOPBARBUTTONS, COLOR_BTN4, COLOR_WHITE, COLOR_CURSOR, 0, ButtonStyleBottomStrip, NULL, NULL, ShowSideFilterMenu), ButtonType);
-    //ShapeLinkAdd(&out, ImageCreate(sortIcon, POS(390, 0, 60, 60), 0), ImageType);
+    ShapeLinkAdd(&out, ButtonCreate(POS(quickIdButtonX, 0, 120, 60), COLOR_TOPBARBUTTONS, COLOR_BTN4, COLOR_WHITE, COLOR_CURSOR, 0, ButtonStyleBottomStrip, NULL, NULL, ShowQuickIdLookup), ButtonType);
+    ShapeLinkAdd(&out, TextCenteredCreate(POS(quickIdButtonX, 0, 120, 60), "ID", COLOR_WHITE, FONT_TEXT[FSize30]), TextCenteredType);
+    ShapeLinkAdd(&out, TextCenteredCreate(POS(quickIdButtonX + 1, 0, 120, 60), "ID", COLOR_WHITE, FONT_TEXT[FSize30]), TextCenteredType);
 
     // LeftArrow
     ShapeLinkAdd(&out, ButtonCreate(POS(800, 0, 120, 60), COLOR_TOPBARBUTTONS, rI->page > 1 ? COLOR_BTNPAGINATION : COLOR_TOPBARBUTTONS, COLOR_WHITE, COLOR_CURSOR, 0, ButtonStyleBottomStrip, NULL, NULL, PrevPageButton), ButtonType);
     ShapeLinkAdd(&out, ImageCreate(arrowLIcon, POS(830, 0, 60, 60), 0), ImageType);
 
-    // Easter egg
-    ShapeLinkAdd(&out, ButtonCreate(POS(386, 0, 170, 60), COLOR_TOPBARBUTTONS, COLOR_TOPBARBUTTONS, COLOR_WHITE, COLOR_TOPBARBUTTONS, BUTTON_NOJOYSEL, ButtonStyleFlat, NULL, NULL, lennify), ButtonType);
+    ShapeLinkAdd(&out, ButtonCreate(POS(644, 0, 156, 60), COLOR_TOPBARBUTTONS, COLOR_TOPBARBUTTONS, COLOR_WHITE, COLOR_TOPBARBUTTONS, BUTTON_NOJOYSEL, ButtonStyleFlat, NULL, NULL, lennify), ButtonType);
 
     // RightArrow
     ShapeLinkAdd(&out, ButtonCreate(POS(1160, 0, 120, 60), COLOR_TOPBARBUTTONS, rI->page < rI->pageCount ? COLOR_BTNPAGINATION : COLOR_TOPBARBUTTONS, COLOR_WHITE, COLOR_CURSOR, 0, ButtonStyleBottomStrip, NULL, NULL, NextPageButton), ButtonType);

@@ -106,7 +106,7 @@ void UpdateMainMenuUI(Context_t *ctx, RequestInfo_t *rI, ShapeLinker_t *items, c
     free(emptyText->text.text);
     emptyText->text.text = CopyTextUtil(emptyMessage);
 
-    int offset = (GetInstallButtonState()) ? 10 : 8;
+    int offset = GetInstallButtonState() ? 12 : 10;
     Button_t *leftButton = ShapeLinkOffset(all, offset)->item;
     Glyph_t *leftButtonIcon = ShapeLinkOffset(all, offset + 11)->item;
     Button_t *rightButton = ShapeLinkOffset(all, offset + 3)->item;
