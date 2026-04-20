@@ -101,7 +101,7 @@ void AllocateInstalls(int len){
 
 int GetInstallSlotOffset(char *name){
 	for (int i = 0; i < 7; i++){
-		if (!strcmp(targetOptions[i], name))
+		if (!strcmp(targetOptions[i + 1], name))
 			return i;
 	}
 

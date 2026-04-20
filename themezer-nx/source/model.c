@@ -16,7 +16,7 @@ const char *sortOptions[] = {
     "Updated",
     "Downloads",
     "Saves",
-    "Added"
+    "Created"
 };
 
 const char *orderOptions[] = {

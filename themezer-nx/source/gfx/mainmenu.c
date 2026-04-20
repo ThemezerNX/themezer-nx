@@ -82,7 +82,7 @@ ShapeLinker_t *CreateMainMenu(ShapeLinker_t *listItems, RequestInfo_t *rI) {
     if (GetInstallButtonState()){
         // SettingsButton
         ShapeLinkAdd(&out, ButtonCreate(POS(240, 0, 120, 60), COLOR_TOPBARBUTTONS, COLOR_BTN3, COLOR_WHITE, COLOR_CURSOR, 0, ButtonStyleBottomStrip, NULL, NULL, ShowSideQueueMenu), ButtonType);
-        ShapeLinkAdd(&out, ImageCreate(setIcon, POS(270, 0, 60, 60), 0), ImageType);
+        ShapeLinkAdd(&out, ImageCreate(queueIcon, POS(270, 0, 60, 60), 0), ImageType);
     }
 
     // SortButton

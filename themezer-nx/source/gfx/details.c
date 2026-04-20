@@ -1,5 +1,11 @@
 #include "gfx.h"
 #include <unistd.h>
+static const char *GetThemeTargetLabel(const ThemeInfo_t *target){
+    if (target->target < 0 || target->target >= 7)
+        return "Unknown";
+
+    return targetOptions[target->target + 1];
+}
 
 int EnlargePreviewImage(Context_t *ctx){
     RequestInfo_t *rI = ShapeLinkFind(ctx->all, DataType)->item;
@@ -35,7 +41,7 @@ int DownloadThemeButton(Context_t *ctx){
 
     RenderShapeLinkList(render);
 
-    char *path = GetThemePath(target->creator, target->name, targetOptions[target->target]);
+    char *path = GetThemePath(target->creator, target->name, GetThemeTargetLabel(target));
     int res = DownloadThemeFromUrl(CopyTextUtil(target->downloadLink), path);
 
     if (res){
@@ -61,7 +67,7 @@ int InstallThemeButton(Context_t *ctx){
 
     RequestInfo_t *rI = ShapeLinkFind(ctx->all, DataType)->item;
     ThemeInfo_t *target = rI->themes;
-    char *path = GetThemePath(target->creator, target->name, targetOptions[target->target]);
+    char *path = GetThemePath(target->creator, target->name, GetThemeTargetLabel(target));
 
     int res = !(access(path, F_OK) != -1);
 
@@ -102,7 +108,7 @@ ShapeLinker_t *CreateSelectMenu(RequestInfo_t *rI){
     ShapeLinkAdd(&out, ButtonCreate(POS(915, 110, SCREEN_W - 980, 60), COLOR_INSTBTN, COLOR_INSTBTNPRS, COLOR_WHITE, COLOR_INSTBTNSEL, (GetInstallButtonState()) ? 0 : BUTTON_DISABLED, ButtonStyleFlat, "Install", FONT_TEXT[FSize30], InstallThemeButton), ButtonType);
     ShapeLinkAdd(&out, ButtonCreate(POS(915, 180, SCREEN_W - 980, 60), COLOR_DLBTN, COLOR_DLBTNPRS, COLOR_WHITE, COLOR_DLBTNSEL, 0, ButtonStyleFlat, "Download Only", FONT_TEXT[FSize30], DownloadThemeButton), ButtonType);
 
-    char *info = CopyTextArgsUtil("By %s\n\nLast Updated: %s\n\nID: %s\nDownloads: %d\nSaves: %d\n\nMenu: %s", target->creator, strtok(target->lastUpdated, "T"), target->id, target->dlCount, target->likeCount, targetOptions[target->target + 1]);
+    char *info = CopyTextArgsUtil("By %s\n\nLast Updated: %s\n\nID: %s\nDownloads: %d\nSaves: %d\n\nMenu: %s", target->creator, strtok(target->lastUpdated, "T"), target->id, target->dlCount, target->likeCount, GetThemeTargetLabel(target));
     ShapeLinkAdd(&out, TextCenteredCreate(POS(920, 250, SCREEN_W - 990, 420), info, COLOR_WHITE, FONT_TEXT[FSize23]), TextBoxType);
     if (target->description != NULL && target->description[0]) {
         ShapeLinkAdd(&out, TextCenteredCreate(POS(60, 590, SCREEN_W - 120, 82), target->description, COLOR_WHITE, FONT_TEXT[FSize23]), TextBoxType);

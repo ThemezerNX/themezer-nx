@@ -1,6 +1,6 @@
 #include "gfx.h"
 
-SDL_Texture *menuIcon, *searchIcon, *setIcon, *arrowLIcon, *arrowRIcon, *LeImg, *XIcon, *logo;
+SDL_Texture *menuIcon, *searchIcon, *queueIcon, *arrowLIcon, *arrowRIcon, *LeImg, *XIcon, *logo;
 SDL_Texture *targetIcons[9];
 SDL_Texture *sortIcons[4];
 SDL_Texture *orderIcons[2];
@@ -9,7 +9,7 @@ void InitTextures(){
     // General Icons
     menuIcon = LoadImageSDL("romfs:/menu.png");
     searchIcon = LoadImageSDL("romfs:/search.png");
-    setIcon = LoadImageSDL("romfs:/set.png");
+    queueIcon = LoadImageSDL("romfs:/queue.png");
     arrowLIcon = LoadImageSDL("romfs:/arrowL.png");
     arrowRIcon = LoadImageSDL("romfs:/arrowR.png");
     LeImg = LoadImageSDL("romfs:/lenny.png");
@@ -30,7 +30,7 @@ void InitTextures(){
     // Filter Icons
     sortIcons[0] = LoadImageSDL("romfs:/filterIcons/updated.png");
     sortIcons[1] = LoadImageSDL("romfs:/filterIcons/downloads.png");
-    sortIcons[2] = LoadImageSDL("romfs:/filterIcons/likes.png");
+    sortIcons[2] = LoadImageSDL("romfs:/filterIcons/saves.png");
     sortIcons[3] = LoadImageSDL("romfs:/filterIcons/created.png");
 
     // Order Icons
@@ -42,7 +42,7 @@ void DestroyTextures(){
     // General Icons
     SDL_DestroyTexture(menuIcon);
     SDL_DestroyTexture(searchIcon);
-    SDL_DestroyTexture(setIcon);
+    SDL_DestroyTexture(queueIcon);
     SDL_DestroyTexture(arrowLIcon);
     SDL_DestroyTexture(arrowRIcon);
     SDL_DestroyTexture(LeImg);
