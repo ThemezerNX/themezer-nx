@@ -21,7 +21,7 @@ void InitTextures(){
     targetIcons[1] = LoadImageSDL("romfs:/targetIcons/home.png");
     targetIcons[2] = LoadImageSDL("romfs:/targetIcons/lock.png");
     targetIcons[3] = LoadImageSDL("romfs:/targetIcons/apps.png");
-    targetIcons[4] = LoadImageSDL("romfs:/targetIcons/settings.png");
+    targetIcons[4] = LoadImageSDL("romfs:/targetIcons/set.png");
     targetIcons[5] = LoadImageSDL("romfs:/targetIcons/psl.png");
     targetIcons[6] = LoadImageSDL("romfs:/targetIcons/user.png");
     targetIcons[7] = LoadImageSDL("romfs:/targetIcons/news.png");
