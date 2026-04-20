@@ -73,6 +73,18 @@ int main(int argc, char* argv[])
     char *errMessage = NULL;
     int errLoc = 0;
 
+    // Show the main menu in loading state before first API request
+    ShapeLinker_t *loadingMenu = CreateMainMenu(NULL, &rI);
+    // index 3 == "no themes" TextCentered, see CreateMainMenu in mainmenu.c
+    ShapeLinker_t *loadingNode = ShapeLinkOffset(loadingMenu, 3);
+    if (loadingNode != NULL && loadingNode->type == TextCenteredType) {
+        TextCentered_t *loadingEmptyText = loadingNode->item;
+        free(loadingEmptyText->text.text);
+        loadingEmptyText->text.text = CopyTextUtil("Loading...");
+    }
+    RenderShapeLinkList(loadingMenu);
+    ShapeLinkDispose(&loadingMenu);
+
     if (!(res = MakeJsonRequest(GenLink(&rI), &rI.response))){
         if (!(res = GenThemeArray(&rI))){
             items = GenListItemList(&rI);
