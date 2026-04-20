@@ -365,3 +365,5 @@ themezer-nx/assets/
 
 .vscode/
 .idea/
+
+.DS_Store
