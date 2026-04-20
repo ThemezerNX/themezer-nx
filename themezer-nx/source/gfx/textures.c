@@ -29,9 +29,9 @@ void InitTextures(){
 
     // Filter Icons
     sortIcons[0] = LoadImageSDL("romfs:/filterIcons/updated.png");
-    sortIcons[1] = LoadImageSDL("romfs:/filterIcons/downloads.png");
-    sortIcons[2] = LoadImageSDL("romfs:/filterIcons/saves.png");
-    sortIcons[3] = LoadImageSDL("romfs:/filterIcons/created.png");
+    sortIcons[1] = LoadImageSDL("romfs:/filterIcons/created.png");
+    sortIcons[2] = LoadImageSDL("romfs:/filterIcons/downloads.png");
+    sortIcons[3] = LoadImageSDL("romfs:/filterIcons/saves.png");
 
     // Order Icons
     orderIcons[0] = LoadImageSDL("romfs:/filterIcons/desc.png");
