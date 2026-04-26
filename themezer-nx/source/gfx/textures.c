@@ -11,7 +11,7 @@ static void SetTextureAlpha(SDL_Texture *texture, Uint8 alpha){
     SDL_SetTextureAlphaMod(texture, alpha);
 }
 
-SDL_Texture *menuIcon, *searchIcon, *queueIcon, *arrowLIcon, *arrowRIcon, *LeImg, *XIcon, *logo, *icon, *banner, *bgTile, *themeBgThumbHash, *packBgThumbHash, *moodDown;
+SDL_Texture *menuIcon, *searchIcon, *queueIcon, *arrowLIcon, *arrowRIcon, *LeImg, *XIcon, *logo, *icon, *banner, *bgTile, *themeBgThumbHash, *packBgThumbHash, *moodDown, *quickIdIcon;
 SDL_Texture *targetIcons[9];
 SDL_Texture *sortIcons[4];
 SDL_Texture *orderIcons[2];
@@ -23,6 +23,7 @@ void InitTextures(){
     queueIcon = LoadImageSDL("romfs:/queue.png");
     arrowLIcon = LoadImageSDL("romfs:/arrowL.png");
     arrowRIcon = LoadImageSDL("romfs:/arrowR.png");
+    quickIdIcon = LoadImageSDL("romfs:/quickId.png");
     LeImg = LoadImageSDL("romfs:/lenny.png");
     XIcon = LoadImageSDL("romfs:/x.png");
     logo = LoadImageSDL("romfs:/logo.png");
@@ -66,6 +67,7 @@ void DestroyTextures(){
     SDL_DestroyTexture(queueIcon);
     SDL_DestroyTexture(arrowLIcon);
     SDL_DestroyTexture(arrowRIcon);
+    SDL_DestroyTexture(quickIdIcon);
     SDL_DestroyTexture(LeImg);
     SDL_DestroyTexture(XIcon);
     SDL_DestroyTexture(logo);

@@ -44,6 +44,8 @@ int PrevPageButton(Context_t *ctx){
 }
 
 int ButtonHandlerMainMenu(Context_t *ctx){
+    if (ctx->kHeld & (HidNpadButton_ZL | HidNpadButton_ZR))
+        return ShowQuickIdLookup(ctx);
     if (ctx->kHeld & HidNpadButton_R)
         return NextPageButton(ctx);
     if (ctx->kHeld & HidNpadButton_L)
@@ -122,7 +124,8 @@ static void AddMainMenuBackground(ShapeLinker_t **out, RequestInfo_t *rI){
 
 ShapeLinker_t *CreateMainMenu(ShapeLinker_t *listItems, RequestInfo_t *rI) { 
     ShapeLinker_t *out = NULL;
-    int quickIdButtonX = GetInstallButtonState() ? 360 : 240;
+    int quickIdButtonX = 240;
+    int queueButtonX = 360;
     SDL_Color accentColor = GetMainMenuAccentColor(rI);
 
     AddMainMenuBackground(&out, rI);
@@ -145,15 +148,13 @@ ShapeLinker_t *CreateMainMenu(ShapeLinker_t *listItems, RequestInfo_t *rI) {
     ShapeLinkAdd(&out, ButtonCreate(POS(120, 0, 120, 60), COLOR_MAIN_TOPBARBUTTONS, accentColor, COLOR_WHITE, COLOR_CURSOR, 0, ButtonStyleBottomStrip, NULL, NULL, ShowSideFilterMenu), ButtonType);
     ShapeLinkAdd(&out, ImageCreate(searchIcon, POS(150, 0, 60, 60), 0), ImageType);
 
-    if (GetInstallButtonState()){
-        // SettingsButton
-        ShapeLinkAdd(&out, ButtonCreate(POS(240, 0, 120, 60), COLOR_MAIN_TOPBARBUTTONS, accentColor, COLOR_WHITE, COLOR_CURSOR, 0, ButtonStyleBottomStrip, NULL, NULL, ShowSideQueueMenu), ButtonType);
-        ShapeLinkAdd(&out, ImageCreate(queueIcon, POS(270, 0, 60, 60), 0), ImageType);
-    }
-
+    // QuickIdButton
     ShapeLinkAdd(&out, ButtonCreate(POS(quickIdButtonX, 0, 120, 60), COLOR_MAIN_TOPBARBUTTONS, accentColor, COLOR_WHITE, COLOR_CURSOR, 0, ButtonStyleBottomStrip, NULL, NULL, ShowQuickIdLookup), ButtonType);
-    ShapeLinkAdd(&out, TextCenteredCreate(POS(quickIdButtonX, 0, 120, 60), "ID", COLOR_WHITE, FONT_TEXT[FSize30]), TextCenteredType);
-    ShapeLinkAdd(&out, TextCenteredCreate(POS(quickIdButtonX + 1, 0, 120, 60), "ID", COLOR_WHITE, FONT_TEXT[FSize30]), TextCenteredType);
+    ShapeLinkAdd(&out, ImageCreate(quickIdIcon, POS(quickIdButtonX + 30, 0, 60, 60), 0), ImageType);
+
+    // QueueButton
+    ShapeLinkAdd(&out, ButtonCreate(POS(queueButtonX, 0, 120, 60), COLOR_MAIN_TOPBARBUTTONS, accentColor, COLOR_WHITE, COLOR_CURSOR, 0, ButtonStyleBottomStrip, NULL, NULL, ShowSideQueueMenu), ButtonType);
+    ShapeLinkAdd(&out, ImageCreate(queueIcon, POS(queueButtonX + 30, 0, 60, 60), 0), ImageType);
 
     // LeftArrow
     ShapeLinkAdd(&out, ButtonCreate(POS(800, 0, 120, 60), COLOR_MAIN_TOPBARBUTTONS, rI->page > 1 ? accentColor : COLOR_MAIN_TOPBARBUTTONS, COLOR_WHITE, COLOR_CURSOR, 0, ButtonStyleBottomStrip, NULL, NULL, PrevPageButton), ButtonType);
@@ -176,7 +177,9 @@ ShapeLinker_t *CreateMainMenu(ShapeLinker_t *listItems, RequestInfo_t *rI) {
     // Glyphs
     ShapeLinkAdd(&out, GlyphCreate(97, 2, BUTTON_X, COLOR_WHITE, FONT_BTN[FSize20]), GlyphType);
     ShapeLinkAdd(&out, GlyphCreate(217, 2, BUTTON_Y, COLOR_WHITE, FONT_BTN[FSize20]), GlyphType);
-    ShapeLinkAdd(&out, GlyphCreate(337, 2, BUTTON_MINUS, COLOR_WHITE, FONT_BTN[FSize20]), GlyphType);
+    ShapeLinkAdd(&out, GlyphCreate(457, 2, BUTTON_MINUS, COLOR_WHITE, FONT_BTN[FSize20]), GlyphType);
+    ShapeLinkAdd(&out, GlyphCreate(243, 2, BUTTON_ZL, COLOR_WHITE, FONT_BTN[FSize20]), GlyphType);
+    ShapeLinkAdd(&out, GlyphCreate(337, 2, BUTTON_ZR, COLOR_WHITE, FONT_BTN[FSize20]), GlyphType);
 
     Glyph_t *leftButtonIcon = GlyphCreate(804, 2, BUTTON_L, COLOR_WHITE, FONT_BTN[FSize20]);
     Glyph_t *rightButtonIcon = GlyphCreate(1256, 2, BUTTON_R, COLOR_WHITE, FONT_BTN[FSize20]);

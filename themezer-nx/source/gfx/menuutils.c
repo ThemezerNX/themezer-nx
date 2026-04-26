@@ -95,16 +95,14 @@ static void SetButtonSecondaryByRect(ShapeLinker_t *all, SDL_Rect pos, SDL_Color
 }
 
 static void UpdateMainMenuAccentColor(RequestInfo_t *rI, ShapeLinker_t *all){
-    int quickIdButtonX = GetInstallButtonState() ? 360 : 240;
     SDL_Color accentColor = GetMainMenuAccentColor(rI);
     ShapeLinker_t *gridLink = ShapeLinkFind(all, ListGridType);
     ListGrid_t *grid = gridLink ? gridLink->item : NULL;
 
     SetButtonSecondaryByRect(all, POS(0, 0, 120, 60), accentColor);
     SetButtonSecondaryByRect(all, POS(120, 0, 120, 60), accentColor);
-    if (GetInstallButtonState())
-        SetButtonSecondaryByRect(all, POS(240, 0, 120, 60), accentColor);
-    SetButtonSecondaryByRect(all, POS(quickIdButtonX, 0, 120, 60), accentColor);
+    SetButtonSecondaryByRect(all, POS(240, 0, 120, 60), accentColor);
+    SetButtonSecondaryByRect(all, POS(360, 0, 120, 60), accentColor);
     SetButtonSecondaryByRect(all, POS(800, 0, 120, 60), rI->page > 1 ? accentColor : COLOR_MAIN_TOPBARBUTTONS);
     SetButtonSecondaryByRect(all, POS(644, 0, 156, 60), COLOR_MAIN_TOPBARBUTTONS);
     SetButtonSecondaryByRect(all, POS(1160, 0, 120, 60), rI->page < rI->pageCount ? accentColor : COLOR_MAIN_TOPBARBUTTONS);

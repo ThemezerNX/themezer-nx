@@ -6,7 +6,7 @@
 #include "../utils.h"
 #include "../curl.h"
 
-extern SDL_Texture *menuIcon, *searchIcon, *queueIcon, *arrowLIcon, *arrowRIcon, *LeImg, *XIcon, *logo, *icon, *banner, *bgTile, *themeBgThumbHash, *packBgThumbHash, *moodDown;
+extern SDL_Texture *menuIcon, *searchIcon, *queueIcon, *arrowLIcon, *arrowRIcon, *LeImg, *XIcon, *logo, *icon, *banner, *bgTile, *themeBgThumbHash, *packBgThumbHash, *moodDown, *quickIdIcon;
 extern SDL_Texture *targetIcons[];
 extern SDL_Texture *sortIcons[];
 extern SDL_Texture *orderIcons[];
