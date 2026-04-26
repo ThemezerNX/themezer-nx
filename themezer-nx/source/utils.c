@@ -123,6 +123,11 @@ void SetInstallSlot(int pos, char *path){
 		}
 		return;
 	}
+
+	if (QueuedInstalls.paths[pos] != NULL){
+		free(QueuedInstalls.paths[pos]);
+		QueuedInstalls.paths[pos] = NULL;
+	}
 	
 	int len = 0;
 
