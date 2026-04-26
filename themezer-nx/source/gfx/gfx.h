@@ -6,7 +6,7 @@
 #include "../utils.h"
 #include "../curl.h"
 
-extern SDL_Texture *menuIcon, *searchIcon, *queueIcon, *arrowLIcon, *arrowRIcon, *LeImg, *XIcon, *logo;
+extern SDL_Texture *menuIcon, *searchIcon, *queueIcon, *arrowLIcon, *arrowRIcon, *LeImg, *XIcon, *logo, *icon, *banner, *bgTile, *themeBgThumbHash, *packBgThumbHash, *moodDown;
 extern SDL_Texture *targetIcons[];
 extern SDL_Texture *sortIcons[];
 extern SDL_Texture *orderIcons[];
@@ -21,12 +21,15 @@ void SetInactiveColorTexture(SDL_Texture *texture);
 int MakeRequestAsCtx(Context_t *ctx, RequestInfo_t *rI);
 void UpdateMainMenuUI(Context_t *ctx, RequestInfo_t *rI, ShapeLinker_t *items, char *emptyMessage);
 void ShowLoadingPageUI(Context_t *ctx, RequestInfo_t *rI);
+void SetMainMenuEmptyMessage(ShapeLinker_t *all, char *emptyMessage);
+void SetMainMenuNoContentState(ShapeLinker_t *all, bool visible);
 ShapeLinker_t *CreateBaseMessagePopup(char *title, char *message);
 ShapeLinker_t *CreateSideBaseMenu(char *menuName);
 int ButtonHandlerBExit(Context_t *ctx);
 int exitFunc(Context_t *ctx);
 int GetInstallButtonState();
 void SetInstallButtonState(int state);
+SDL_Color GetMainMenuAccentColor(RequestInfo_t *rI);
 int ShowCurlError(Context_t *ctx);
 int ShowConnErrMenu(int res);
 
@@ -49,4 +52,5 @@ int ShowQuickIdLookup(Context_t *ctx);
 
 // mainmenu.c
 int ButtonHandlerMainMenu(Context_t *ctx);
+ShapeLinker_t *CreateSplashScreen();
 ShapeLinker_t *CreateMainMenu(ShapeLinker_t *listItems, RequestInfo_t *rI);

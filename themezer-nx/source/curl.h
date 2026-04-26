@@ -26,3 +26,4 @@ int AddThemeImagesToDownloadQueue(RequestInfo_t *rI, bool thumb);
 int CleanupTransferInfo(RequestInfo_t *rI);
 void FreeThemes(RequestInfo_t *rI);
 int LookupByQuickId(const char *quickId, RequestInfo_t *rI, QuickIdLookupType_t *lookupType);
+SDL_Texture *CreateThumbHashTexture(const char *encodedThumbHash);

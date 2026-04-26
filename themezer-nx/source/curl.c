@@ -33,7 +33,6 @@ const char *requestOrders[] = {
 
 static int GetPreviewUrls(cJSON *item, const char *fieldName, cJSON **original, cJSON **thumb);
 static int ParseThemeList(ThemeInfo_t **storage, int size, cJSON *themesList);
-static SDL_Texture *CreateThumbHashTexture(const char *encodedThumbHash);
 int GetIndexOfStrArr(const char **toSearch, int limit, const char *search);
 
 static char *GenLookupByQuickIdLink(const char *quickId){
@@ -225,7 +224,7 @@ static int GetPreviewUrls(cJSON *item, const char *fieldName, cJSON **original, 
     return cJSON_IsString(*original) && cJSON_IsString(*thumb);
 }
 
-static SDL_Texture *CreateThumbHashTexture(const char *encodedThumbHash){
+SDL_Texture *CreateThumbHashTexture(const char *encodedThumbHash){
     if (!encodedThumbHash || !encodedThumbHash[0])
         return NULL;
 
