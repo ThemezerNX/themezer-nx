@@ -3,8 +3,8 @@
 
 #define COLOR_CHANNEL_ADD(value, amount) (((value) + (amount) > 255) ? 255 : ((value) + (amount)))
 #define COLOR_RGB_ADD(r, g, b, a, amount) COLOR(COLOR_CHANNEL_ADD(r, amount), COLOR_CHANNEL_ADD(g, amount), COLOR_CHANNEL_ADD(b, amount), a)
-#define COLOR_SELECT_FROM(r, g, b, a) COLOR_RGB_ADD(r, g, b, a, 10)
-#define COLOR_PRESS_FROM(r, g, b, a) COLOR_RGB_ADD(r, g, b, a, 20)
+#define COLOR_SELECT_FROM(r, g, b, a) COLOR_RGB_ADD(r, g, b, a, 25)
+#define COLOR_PRESS_FROM(r, g, b, a) COLOR_RGB_ADD(r, g, b, a, 50)
 #define COLOR_FROM_RGBA(rgba) COLOR(rgba)
 #define COLOR_SELECT_FROM_RGBA(rgba) COLOR_SELECT_FROM(rgba)
 #define COLOR_PRESS_FROM_RGBA(rgba) COLOR_PRESS_FROM(rgba)
