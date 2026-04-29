@@ -87,13 +87,13 @@ ShapeLinker_t *CreateSideFilterMenu(FilterOptions_t *options){
     ShapeLinkAdd(&out, options, DataType);
 
     char *search = options->search[0] ? CopyTextArgsUtil("Search: %s", (options->search)) : CopyTextUtil("Search");
-    ShapeLinkAdd(&out, RectangleCreate(POS(0, 60, 400, 50), COLOR_BTN2, 1), RectangleType);
+    ShapeLinkAdd(&out, RectangleCreate(POS(0, 60, 400, 50), COLOR_SUBBAR, 1), RectangleType);
     ShapeLinkAdd(&out, TextCenteredCreate(POS(0, 60, 400, 50), search, COLOR_WHITE, FONT_TEXT[FSize23]), TextCenteredType);
     ShapeLinkAdd(&out, ButtonCreate(POS(200, 110, 200, 50), COLOR_MAINBG, COLOR_CURSORPRESS, COLOR_WHITE, COLOR_CURSOR, 0, ButtonStyleFlat, "Clear", FONT_TEXT[FSize28], SideMenuClearSearch), ButtonType);
     ShapeLinkAdd(&out, ButtonCreate(POS(0, 110, 200, 50), COLOR_MAINBG, COLOR_CURSORPRESS, COLOR_WHITE, COLOR_CURSOR, 0, ButtonStyleFlat, "Set", FONT_TEXT[FSize28], SideMenuSetSearch), ButtonType);
     free(search);
 
-    ShapeLinkAdd(&out, RectangleCreate(POS(0, 200, 400, 50), COLOR_BTN2, 1), RectangleType);
+    ShapeLinkAdd(&out, RectangleCreate(POS(0, 200, 400, 50), COLOR_SUBBAR, 1), RectangleType);
 
     ShapeLinkAdd(&out, TextCenteredCreate(POS(0, 200, 400, 50), "Sort By", COLOR_WHITE, FONT_TEXT[FSize23]), TextCenteredType);
 
@@ -110,7 +110,7 @@ ShapeLinker_t *CreateSideFilterMenu(FilterOptions_t *options){
     ShapeLinkAdd(&out, ListViewCreate(POS(0, 250, 400, 200), 50, COLOR_MAINBG, COLOR_CURSOR, COLOR_CURSORPRESS, COLOR_SCROLLBAR, COLOR_SCROLLBARTHUMB, LIST_CENTERLEFT, sortList, SideMenuSortSelection, NULL, FONT_TEXT[FSize28]), ListViewType);
 
 
-    ShapeLinkAdd(&out, RectangleCreate(POS(0, 490, 400, 50), COLOR_BTN2, 1), RectangleType);
+    ShapeLinkAdd(&out, RectangleCreate(POS(0, 490, 400, 50), COLOR_SUBBAR, 1), RectangleType);
 
     char *order = CopyTextUtil("Order");
     ShapeLinkAdd(&out, TextCenteredCreate(POS(0, 490, 400, 50), order, COLOR_WHITE, FONT_TEXT[FSize23]), TextCenteredType);

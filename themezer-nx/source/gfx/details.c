@@ -221,7 +221,7 @@ int ThemeSelect(Context_t *ctx){
 }
 
 int ShowQuickIdLookup(Context_t *ctx){
-    char *quickId = showKeyboard("Input Quick ID (you can find this on the website)", NULL, 64);
+    char *quickId = showKeyboard("Input Quick ID (find this on themezer.net)", NULL, 64);
     if (quickId == NULL)
         return 0;
 
