@@ -725,8 +725,7 @@ int HandleDownloadQueue(Context_t *ctx){
                     printf("Download of index %d finished!\n", *index);
                     get_request_t *req = &rI->tInfo.transfers[*index].data;
                     SDL_Texture *oldPreview = rI->themes[*index].preview;
-                    int horizontalPadding = (rI->target == -1 && gvLink != NULL) ? 5 : 0;
-                    rI->themes[*index].preview = LoadImageMemWithHorizontalPadding(req->buffer, req->len, horizontalPadding);
+                    rI->themes[*index].preview = LoadImageMemSDL(req->buffer, req->len);
                     if (rI->packs != NULL)
                         rI->packs[*index].preview = rI->themes[*index].preview;
                     if (gvLink != NULL){
