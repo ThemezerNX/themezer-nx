@@ -37,6 +37,7 @@ int GetIndexOfStrArr(const char **toSearch, int limit, const char *search);
 
 static char *GenLookupByQuickIdLink(const char *quickId){
     static char request[0x1200];
+    request[0] = '\0';
     const char *query = "query($quickId:String!){switch{lookupByQuickId(quickId:$quickId){__typename ... on SwitchPack{name creator{username} collageThumbHash collagePreview{jpgHdUrl jpgThumbUrl} themes{hexId creator{username} name description updatedAt downloadCount saveCount target screenshotThumbHash screenshotPreview{jpgHdUrl jpgThumbUrl} downloadUrl}} ... on SwitchTheme{hexId creator{username} name description updatedAt downloadCount saveCount target screenshotThumbHash screenshotPreview{jpgHdUrl jpgThumbUrl} downloadUrl} ... on SwitchRemoteInstallTheme{author createdAt downloadUrl name quickId target}}}}";
     char *variables = NULL;
 
@@ -59,6 +60,9 @@ static char *GenLookupByQuickIdLink(const char *quickId){
         if (encodedVariables)
             curl_free(encodedVariables);
         curl_easy_cleanup(curl);
+    }
+    else {
+        snprintf(request, sizeof(request), "https://api.themezer.net/graphql?query=%s&variables=%s", query, variables ? variables : "{}");
     }
 
     free(variables);
@@ -537,8 +541,11 @@ int LookupByQuickId(const char *quickId, RequestInfo_t *rI, QuickIdLookupType_t 
         return res;
     }
 
-    if (hasError(rI->response))
+    if (hasError(rI->response)){
+        cJSON_Delete(rI->response);
+        rI->response = NULL;
         return -4;
+    }
 
     cJSON *data = cJSON_GetObjectItemCaseSensitive(rI->response, "data");
     cJSON *switchObj = cJSON_GetObjectItemCaseSensitive(data, "switch");

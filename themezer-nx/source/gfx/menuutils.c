@@ -218,7 +218,7 @@ int ShowConnErrMenu(int res){
     return 0;
 }
 
-void UpdateMainMenuUI(Context_t *ctx, RequestInfo_t *rI, ShapeLinker_t *items, char *emptyMessage){
+void UpdateMainMenuUI(Context_t *ctx, RequestInfo_t *rI, ShapeLinker_t *items){
     ShapeLinker_t *all = ctx->all;
     ListGrid_t *gv = ShapeLinkFind(all, ListGridType)->item;
     TextCentered_t *pageText = FindTextCenteredByRect(all, POS(920, 0, 240, 60));
@@ -238,10 +238,6 @@ void UpdateMainMenuUI(Context_t *ctx, RequestInfo_t *rI, ShapeLinker_t *items, c
 
     if (items){
         SetMainMenuEmptyMessage(all, " ");
-        SetMainMenuNoContentState(all, false);
-    }
-    else if (strcmp(emptyMessage, "Loading...") == 0){
-        SetMainMenuEmptyMessage(all, emptyMessage);
         SetMainMenuNoContentState(all, false);
     }
     else {
@@ -267,7 +263,9 @@ void UpdateMainMenuUI(Context_t *ctx, RequestInfo_t *rI, ShapeLinker_t *items, c
 }
 
 void ShowLoadingPageUI(Context_t *ctx, RequestInfo_t *rI){
-    UpdateMainMenuUI(ctx, rI, NULL, "Loading...");
+    UpdateMainMenuUI(ctx, rI, NULL);
+    SetMainMenuEmptyMessage(ctx->all, "Loading...");
+    SetMainMenuNoContentState(ctx->all, false);
     RenderShapeLinkList(ctx->all);
 }
 
@@ -285,7 +283,7 @@ int MakeRequestAsCtx(Context_t *ctx, RequestInfo_t *rI){
             items = GenListItemList(rI);
             AddThemeImagesToDownloadQueue(rI, true);
 
-            UpdateMainMenuUI(ctx, rI, items, "X.X There seem to be no themes here!");
+            UpdateMainMenuUI(ctx, rI, items);
         }
     }
     else {

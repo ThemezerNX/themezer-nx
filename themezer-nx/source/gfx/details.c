@@ -183,7 +183,7 @@ ShapeLinker_t *CreateSelectMenu(RequestInfo_t *rI){
 
     ShapeLinkAdd(&out, ButtonCreate(POS(SCREEN_W - 100, 50, 50, 50), COLOR_TOPBAR, COLOR_RED, COLOR_WHITE, COLOR_TOPBARCURSOR, 0, ButtonStyleFlat, NULL, NULL, exitFunc), ButtonType);
 
-    ShapeLinkAdd(&out, ButtonCreate(POS(50, 100, 860, 488), COLOR_MAINBG, COLOR_CARDCURSORPRESS, COLOR_WHITE, COLOR_CARDCURSOR, 0, ButtonStyleFlat, NULL, NULL, EnlargePreviewImage), ButtonType);
+    ShapeLinkAdd(&out, ButtonCreate(POS(50, 100, 860, 488), COLOR_MAINBG, COLOR_CARDCURSORPRESS, COLOR_WHITE, COLOR_CARDCURSOR, (target->preview == NULL) ? BUTTON_DISABLED : 0, ButtonStyleFlat, NULL, NULL, EnlargePreviewImage), ButtonType);
     ShapeLinkAdd(&out, ImageCreate(target->preview, POS(55, 105, 850, 478), 0), ImageType);
 
     ShapeLinkAdd(&out, ImageCreate(XIcon, POS(SCREEN_W - 100, 50, 50, 50), 0), ImageType);
@@ -211,9 +211,6 @@ int ThemeSelect(Context_t *ctx){
     RequestInfo_t *rI = ShapeLinkFind(all, DataType)->item;
     ThemeInfo_t *target = &rI->themes[gv->highlight];
     
-    if (target->preview == NULL)
-        return 0;
-
     if (rI->target == 0)
         return ShowPackDetails(ctx);
 
