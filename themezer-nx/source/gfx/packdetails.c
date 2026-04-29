@@ -58,7 +58,7 @@ static int ShowPackTargetChoice(ThemeInfo_t *themes, int themeCount, int target)
     for (int i = 0; i < themeCount; i++){
         if (themes[i].target == target){
             candidateIndexes[candidateCount] = i;
-            ShapeLinkAdd(&items, ListItemCreate(COLOR_WHITE, COLOR_WHITE, NULL, themes[i].name, themes[i].creator), ListItemType);
+            ShapeLinkAdd(&items, ListItemCreate(COLOR_WHITE, COLOR_VERYLIGHTGREY_RGBA, NULL, themes[i].name, themes[i].creator), ListItemType);
             candidateCount++;
         }
     }
