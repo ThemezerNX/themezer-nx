@@ -102,3 +102,41 @@ void SetActiveColorTexture(SDL_Texture *texture){
 void SetInactiveColorTexture(SDL_Texture *texture){
     SetTextureColorSDL(texture, COLOR_WHITE);
 }
+
+SDL_Texture *LoadImageMemWithHorizontalPadding(void *data, int size, int paddingPx){
+    if (paddingPx <= 0)
+        return LoadImageMemSDL(data, size);
+
+    SDL_Surface *src = IMG_Load_RW(SDL_RWFromMem(data, size), 1);
+    if (src == NULL)
+        return NULL;
+
+    SDL_Surface *srcRGBA = SDL_ConvertSurfaceFormat(src, SDL_PIXELFORMAT_RGBA32, 0);
+    SDL_FreeSurface(src);
+    if (srcRGBA == NULL)
+        return NULL;
+
+    if (srcRGBA->w <= paddingPx * 2){
+        SDL_Texture *fallback = LoadImageRGBASDL(srcRGBA->pixels, srcRGBA->w, srcRGBA->h);
+        SDL_FreeSurface(srcRGBA);
+        return fallback;
+    }
+
+    SDL_Surface *dstRGBA = SDL_CreateRGBSurfaceWithFormat(0, srcRGBA->w, srcRGBA->h, 32, SDL_PIXELFORMAT_RGBA32);
+    if (dstRGBA == NULL){
+        SDL_Texture *fallback = LoadImageRGBASDL(srcRGBA->pixels, srcRGBA->w, srcRGBA->h);
+        SDL_FreeSurface(srcRGBA);
+        return fallback;
+    }
+
+    SDL_FillRect(dstRGBA, NULL, SDL_MapRGBA(dstRGBA->format, 0, 0, 0, 0));
+
+    SDL_Rect drawRect = POS(paddingPx, 0, srcRGBA->w - paddingPx * 2, srcRGBA->h);
+    SDL_BlitScaled(srcRGBA, NULL, dstRGBA, &drawRect);
+
+    SDL_Texture *out = LoadImageRGBASDL(dstRGBA->pixels, dstRGBA->w, dstRGBA->h);
+    SDL_FreeSurface(srcRGBA);
+    SDL_FreeSurface(dstRGBA);
+
+    return out;
+}

@@ -16,6 +16,7 @@ void InitTextures();
 void DestroyTextures();
 void SetActiveColorTexture(SDL_Texture *texture);
 void SetInactiveColorTexture(SDL_Texture *texture);
+SDL_Texture *LoadImageMemWithHorizontalPadding(void *data, int size, int paddingPx);
 
 // menuutils.c
 int MakeRequestAsCtx(Context_t *ctx, RequestInfo_t *rI);
