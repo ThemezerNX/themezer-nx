@@ -22,7 +22,7 @@ ShapeLinker_t *errorMenu(char *message, int errLoc){
         ShapeLinkAdd(&out, TextCenteredCreate(POS(0, SCREEN_H - 50, 1280, 50), message, COLOR_RED, FONT_TEXT[FSize30]), TextCenteredType);
 
     bool ShowErrMenu = (errLoc == 1 && cURLErrBuff[0] != '\0');
-    ShapeLinkAdd(&out, ButtonCreate(POS(0, 0, SCREEN_W, 50), COLOR_TOPBAR, COLOR_BTN4, COLOR_WHITE, COLOR_TOPBARCURSOR, (ShowErrMenu) ? 0 : BUTTON_DISABLED, ButtonStyleTopStrip, (ShowErrMenu) ? "Details" : "Details Unavailable", FONT_TEXT[FSize30], ShowCurlError), ButtonType);
+    ShapeLinkAdd(&out, ButtonCreate(POS(0, 0, SCREEN_W, 50), COLOR_TOPBAR, COLOR_RED, COLOR_WHITE, COLOR_TOPBARCURSOR, (ShowErrMenu) ? 0 : BUTTON_DISABLED, ButtonStyleTopStrip, (ShowErrMenu) ? "Details" : "Details Unavailable", FONT_TEXT[FSize30], ShowCurlError), ButtonType);
 
     return out;
 }
@@ -51,9 +51,7 @@ int main(int argc, char* argv[])
 
     RequestInfo_t rI = {0, 0, 0, 0, 0, 0, "", 0, 0, 0, NULL, NULL, {NULL, 0, NULL, true}, NULL};
     SetDefaultsRequestInfo(&rI);
-    rI.maxDls = 3;
-    rI.limit = 12;
-    rI.target = 8;
+    rI.target = 0;
     ShapeLinker_t *items = NULL;
 
     AllocateInstalls(7);
@@ -74,6 +72,10 @@ int main(int argc, char* argv[])
 
     char *errMessage = NULL;
     int errLoc = 0;
+
+    ShapeLinker_t *loadingMenu = CreateSplashScreen();
+    RenderShapeLinkList(loadingMenu);
+    ShapeLinkDispose(&loadingMenu);
 
     if (!(res = MakeJsonRequest(GenLink(&rI), &rI.response))){
         if (!(res = GenThemeArray(&rI))){

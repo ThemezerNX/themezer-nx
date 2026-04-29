@@ -43,6 +43,7 @@ typedef struct { // We are not going to display like half of these
     //int likeCount;
     char *imgLink;
     char *thumbLink;
+    SDL_Texture *preview;
     int themeCount;
     int isDlDone;
     ThemeInfo_t *themes;

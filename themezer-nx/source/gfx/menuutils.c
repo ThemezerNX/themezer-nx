@@ -15,6 +15,136 @@ int GetInstallButtonState(){
     return InstallButtonState;
 }
 
+static bool SameRect(SDL_Rect a, SDL_Rect b){
+    return a.x == b.x && a.y == b.y && a.w == b.w && a.h == b.h;
+}
+
+static TextCentered_t *FindTextCenteredByRect(ShapeLinker_t *all, SDL_Rect pos){
+    for (ShapeLinker_t *iter = all; iter != NULL; iter = iter->next){
+        if (iter->type == TextCenteredType){
+            TextCentered_t *text = iter->item;
+            SDL_Rect textPos = POS(text->text.x, text->text.y, text->w, text->h);
+            if (SameRect(textPos, pos))
+                return text;
+        }
+    }
+
+    return NULL;
+}
+
+static Image_t *FindImageByTexture(ShapeLinker_t *all, SDL_Texture *texture){
+    for (ShapeLinker_t *iter = all; iter != NULL; iter = iter->next){
+        if (iter->type == ImageType){
+            Image_t *image = iter->item;
+            if (image->texture == texture)
+                return image;
+        }
+    }
+
+    return NULL;
+}
+
+static Button_t *FindButtonByRect(ShapeLinker_t *all, SDL_Rect pos){
+    for (ShapeLinker_t *iter = all; iter != NULL; iter = iter->next){
+        if (iter->type == ButtonType){
+            Button_t *button = iter->item;
+            if (SameRect(button->pos, pos))
+                return button;
+        }
+    }
+
+    return NULL;
+}
+
+static Glyph_t *FindGlyphByPosition(ShapeLinker_t *all, int x, int y){
+    for (ShapeLinker_t *iter = all; iter != NULL; iter = iter->next){
+        if (iter->type == GlyphType){
+            Glyph_t *glyph = iter->item;
+            if (glyph->x == x && glyph->y == y)
+                return glyph;
+        }
+    }
+
+    return NULL;
+}
+
+static Image_t *FindMainMenuThumbHashBackground(ShapeLinker_t *all){
+    for (ShapeLinker_t *iter = all; iter != NULL; iter = iter->next){
+        if (iter->type == ImageType){
+            Image_t *image = iter->item;
+            if (image->texture == themeBgThumbHash || image->texture == packBgThumbHash)
+                return image;
+        }
+    }
+
+    return NULL;
+}
+
+static SDL_Texture *GetMainMenuThumbHashBackground(RequestInfo_t *rI){
+    return (rI->target == 0) ? packBgThumbHash : themeBgThumbHash;
+}
+
+SDL_Color GetMainMenuAccentColor(RequestInfo_t *rI){
+    return (rI->target == 0) ? COLOR_MAIN_TOPBAR_PACK : COLOR_MAIN_TOPBAR_THEME;
+}
+
+static void SetButtonSecondaryByRect(ShapeLinker_t *all, SDL_Rect pos, SDL_Color color){
+    Button_t *button = FindButtonByRect(all, pos);
+    if (button)
+        button->secondary = color;
+}
+
+static void UpdateMainMenuAccentColor(RequestInfo_t *rI, ShapeLinker_t *all){
+    SDL_Color accentColor = GetMainMenuAccentColor(rI);
+    ShapeLinker_t *gridLink = ShapeLinkFind(all, ListGridType);
+    ListGrid_t *grid = gridLink ? gridLink->item : NULL;
+
+    SetButtonSecondaryByRect(all, POS(0, 0, 120, 60), accentColor);
+    SetButtonSecondaryByRect(all, POS(120, 0, 120, 60), accentColor);
+    SetButtonSecondaryByRect(all, POS(240, 0, 120, 60), accentColor);
+    SetButtonSecondaryByRect(all, POS(360, 0, 120, 60), accentColor);
+    SetButtonSecondaryByRect(all, POS(800, 0, 120, 60), rI->page > 1 ? accentColor : COLOR_MAIN_TOPBARBUTTONS);
+    SetButtonSecondaryByRect(all, POS(644, 0, 156, 60), COLOR_MAIN_TOPBARBUTTONS);
+    SetButtonSecondaryByRect(all, POS(1160, 0, 120, 60), rI->page < rI->pageCount ? accentColor : COLOR_MAIN_TOPBARBUTTONS);
+
+    if (grid){
+        grid->selected = accentColor;
+        grid->pressed = accentColor;
+        grid->scrollbarBg = COLOR_SCROLLBARBG;
+        grid->scrollbarThumb = accentColor;
+    }
+}
+
+static void UpdateMainMenuBackground(RequestInfo_t *rI, ShapeLinker_t *all){
+    Image_t *thumbHashBackground = FindMainMenuThumbHashBackground(all);
+    if (thumbHashBackground)
+        thumbHashBackground->texture = GetMainMenuThumbHashBackground(rI);
+
+    UpdateMainMenuAccentColor(rI, all);
+}
+
+void SetMainMenuEmptyMessage(ShapeLinker_t *all, char *emptyMessage){
+    TextCentered_t *emptyText = FindTextCenteredByRect(all, POS(0, 60, SCREEN_W, SCREEN_H - 60));
+    if (!emptyText)
+        return;
+
+    free(emptyText->text.text);
+    emptyText->text.text = CopyTextUtil(emptyMessage);
+}
+
+void SetMainMenuNoContentState(ShapeLinker_t *all, bool visible){
+    Image_t *emptyImage = FindImageByTexture(all, moodDown);
+    TextCentered_t *emptyCaption = FindTextCenteredByRect(all, POS(0, 460, SCREEN_W, 80));
+
+    if (emptyImage)
+        emptyImage->pos = visible ? POS(576, 246, 128, 128) : POS(0, 0, 0, 0);
+
+    if (emptyCaption){
+        free(emptyCaption->text.text);
+        emptyCaption->text.text = CopyTextUtil(visible ? "Nothing to see here..." : " ");
+    }
+}
+
 int exitFunc(Context_t *ctx){
     return -1;
 }
@@ -88,6 +218,57 @@ int ShowConnErrMenu(int res){
     return 0;
 }
 
+void UpdateMainMenuUI(Context_t *ctx, RequestInfo_t *rI, ShapeLinker_t *items){
+    ShapeLinker_t *all = ctx->all;
+    ListGrid_t *gv = ShapeLinkFind(all, ListGridType)->item;
+    TextCentered_t *pageText = FindTextCenteredByRect(all, POS(920, 0, 240, 60));
+
+    UpdateMainMenuBackground(rI, all);
+
+    if (gv->text)
+        ShapeLinkDispose(&gv->text);
+    gv->text = items;
+    SETBIT(gv->options, LIST_DISABLED, !items);
+    gv->highlight = 0;
+
+    if (pageText){
+        free(pageText->text.text);
+        pageText->text.text = CopyTextArgsUtil("%d/%d (%d)", rI->page, rI->pageCount, rI->itemCount);
+    }
+
+    if (items){
+        SetMainMenuEmptyMessage(all, " ");
+        SetMainMenuNoContentState(all, false);
+    }
+    else {
+        SetMainMenuEmptyMessage(all, " ");
+        SetMainMenuNoContentState(all, true);
+    }
+
+    Button_t *leftButton = FindButtonByRect(all, POS(800, 0, 120, 60));
+    Glyph_t *leftButtonIcon = FindGlyphByPosition(all, 804, 2);
+    Button_t *rightButton = FindButtonByRect(all, POS(1160, 0, 120, 60));
+    Glyph_t *rightButtonIcon = FindGlyphByPosition(all, 1256, 2);
+
+    if (leftButton && leftButtonIcon && rI->page > 1) {
+        SETBIT(leftButtonIcon->options, TEXT_GLYPH_NO_RENDER, 0);
+    } else if (leftButton && leftButtonIcon) {
+        SETBIT(leftButtonIcon->options, TEXT_GLYPH_NO_RENDER, 1);
+    }
+    if (rightButton && rightButtonIcon && rI->page < rI->pageCount) {
+        SETBIT(rightButtonIcon->options, TEXT_GLYPH_NO_RENDER, 0);
+    } else if (rightButton && rightButtonIcon) {
+        SETBIT(rightButtonIcon->options, TEXT_GLYPH_NO_RENDER, 1);
+    }
+}
+
+void ShowLoadingPageUI(Context_t *ctx, RequestInfo_t *rI){
+    UpdateMainMenuUI(ctx, rI, NULL);
+    SetMainMenuEmptyMessage(ctx->all, "Loading...");
+    SetMainMenuNoContentState(ctx->all, false);
+    RenderShapeLinkList(ctx->all);
+}
+
 int MakeRequestAsCtx(Context_t *ctx, RequestInfo_t *rI){
     ShapeLinker_t *items = NULL;
     int res = -1;
@@ -102,44 +283,7 @@ int MakeRequestAsCtx(Context_t *ctx, RequestInfo_t *rI){
             items = GenListItemList(rI);
             AddThemeImagesToDownloadQueue(rI, true);
 
-            // Update pagination text
-            ShapeLinker_t *all = ctx->all;
-            ListGrid_t *gv = ShapeLinkFind(all, ListGridType)->item;
-            TextCentered_t *pageText = ShapeLinkFind(all, TextCenteredType)->item;
-            if (gv->text)
-                ShapeLinkDispose(&gv->text);
-            
-            gv->text = items;
-            SETBIT(gv->options, LIST_DISABLED, !items);
-            gv->highlight = 0;
-            free(pageText->text.text);
-            pageText->text.text = CopyTextArgsUtil("%d/%d (%d)", rI->page, rI->pageCount, rI->itemCount);
-
-            // Update pagination buttons
-            //10, 13
-            int offset = (GetInstallButtonState()) ? 10 : 8;
-
-            Button_t *leftButton = ShapeLinkOffset(all, offset)->item;
-            Glyph_t *leftButtonIcon = ShapeLinkOffset(all, offset + 11)->item;
-            Button_t *rightButton = ShapeLinkOffset(all, offset + 3)->item;
-            Glyph_t *rightButtonIcon = ShapeLinkOffset(all, offset + 12)->item;
-
-            // Left end
-            if (rI->page > 1) {
-                leftButton->secondary = COLOR_BTNPAGINATION;
-                SETBIT(leftButtonIcon->options, TEXT_GLYPH_NO_RENDER, 0);
-            } else {
-                leftButton->secondary = COLOR_TOPBARBUTTONS;
-                SETBIT(leftButtonIcon->options, TEXT_GLYPH_NO_RENDER, 1);
-            }
-            // Right end
-            if (rI->page < rI->pageCount) {
-                rightButton->secondary = COLOR_BTNPAGINATION;
-                SETBIT(rightButtonIcon->options, TEXT_GLYPH_NO_RENDER, 0);
-            } else {
-                rightButton->secondary = COLOR_TOPBARBUTTONS;
-                SETBIT(rightButtonIcon->options, TEXT_GLYPH_NO_RENDER, 1);
-            }
+            UpdateMainMenuUI(ctx, rI, items);
         }
     }
     else {

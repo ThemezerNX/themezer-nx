@@ -6,6 +6,13 @@
 
 extern char cURLErrBuff[CURL_ERROR_SIZE];
 
+typedef enum {
+	QuickIdLookupNone = 0,
+	QuickIdLookupTheme,
+	QuickIdLookupPack,
+	QuickIdLookupRemoteTheme,
+} QuickIdLookupType_t;
+
 int GetThemesList(char *url, char *data, cJSON **response);
 ShapeLinker_t *GenListItemsFromJson(cJSON *json);
 int MakeJsonRequest(char *url, cJSON **response);
@@ -18,3 +25,5 @@ int HandleDownloadQueue(Context_t *ctx);
 int AddThemeImagesToDownloadQueue(RequestInfo_t *rI, bool thumb);
 int CleanupTransferInfo(RequestInfo_t *rI);
 void FreeThemes(RequestInfo_t *rI);
+int LookupByQuickId(const char *quickId, RequestInfo_t *rI, QuickIdLookupType_t *lookupType);
+SDL_Texture *CreateThumbHashTexture(const char *encodedThumbHash);
